@@ -76,7 +76,7 @@ window.__MEALS__ = [
   ],
   steps:[
     {text:'Fill AGARO kettle with 350ml water. Turn knob to **II (High)**.',timer:0},
-    {text:'Peel 2 bananas, break into chunks. Drop into Inalsa food processor bowl (or mixer jar). Add 200ml milk and 1 tsp sugar. Press **2 (High)** for 30 seconds. Pour into glass.',timer:30},
+    {text:'Peel 2 bananas, break into chunks. Add to NutriPro blender jar. Add 200ml milk and 1 tsp sugar. Lock jar onto base, flip I/O switch to **I (On)**. Blend 30 seconds. Pour into glass.',timer:30},
     {text:'By now kettle has boiled. Pour water into a vessel, add 2 eggs. Cover. Wait 10 minutes.',timer:600},
     {text:'After 10 min, pour out hot water, run cold water on eggs. Peel, eat with a pinch of salt.',timer:30},
   ],
@@ -104,7 +104,7 @@ window.__MEALS__ = [
     {emoji:'🧂',name:'Salt for chutney',nameTA:'உப்பு',nameUR:'نمک',qty:0.25,unit:'tsp'},
   ],
   steps:[
-    {text:'CHUTNEY FIRST: Put 4 tbsp grated coconut + ½ green chilli + ½ inch ginger + ¼ tsp salt + 3 tbsp water into Inalsa food processor (or mixer jar). Press **2 (High)** for 20 seconds. Pour into small bowl.',timer:20},
+    {text:'CHUTNEY FIRST: Put 4 tbsp grated coconut + ½ green chilli + ½ inch ginger + ¼ tsp salt + 3 tbsp water into NutriPro blender jar. Lock onto base, flip **I (On)**. Blend 20 seconds. Pour into small bowl.',timer:20},
     {text:'Heat flat pan on induction at 1400W on V-Guard (**Fry** preset). Put a few drops of water — if they dance and evaporate in 2 seconds, pan is ready. Add ½ tsp oil.',timer:60},
     {text:'Pour 3–4 tbsp of dosa batter in the center of the pan. Quickly spread it in circles using the back of a spoon — move outward from center. Keep going until it is thin like a crepe.',timer:0},
     {text:'Crack 1 egg on top of the dosa. Break the yolk with a spoon and spread it. Add chopped onion and a pinch of salt. Cook for 1.5 minutes until edges turn brown.',timer:90},
@@ -680,9 +680,9 @@ window.__MEALS__ = [
     {emoji:'🍚',name:'Sugar or honey',nameTA:'சர்க்கரை',nameUR:'چینی',qty:1,unit:'tsp'},
   ],
   steps:[
-    {text:'Peel 2 bananas, break into chunks. Add to Inalsa food processor bowl (or mixer jar).',timer:0},
+    {text:'Peel 2 bananas, break into chunks. Add to NutriPro blender jar.',timer:0},
     {text:'Add 250ml milk, 1 tsp sugar. If using raw egg for extra protein, crack it in now.',timer:0},
-    {text:'Press **2 (High)** on Inalsa for 30–40 seconds until smooth. Pour and drink immediately.',timer:40},
+    {text:'Lock NutriPro jar onto base, flip I/O switch to **I (On)**. Blend 30–40 seconds until smooth. Pour and drink immediately.',timer:40},
   ],
   tip:'Adding a raw egg to a smoothie is safe — used by athletes. Adds 6g protein for free. Taste is masked by banana.',
   video:'banana protein smoothie recipe',
@@ -1403,7 +1403,7 @@ window.__MEALS__ = [
   steps:[
     {text:'Make roti dough: 150g atta + pinch salt + 80ml water. Knead 3 minutes (or Inalsa kneading blade, **2 (High)**, 60 sec). Cover. Rest while cooking.',timer:180},
     {text:'MAKE THE BASE: Heat vessel at medium. Add 1 tbsp oil. Add roughly chopped onion + garlic + green chilli + tomatoes. Cook 5 minutes, stirring, until tomatoes fully break down and everything is soft.',timer:300},
-    {text:'Let this mixture cool for 3 minutes. Pour into Inalsa food processor bowl (or mixer jar). Press **2 (High)** for 30 seconds until completely smooth. Pour this red puree back into vessel. This is your gravy base.',timer:180},
+    {text:'Let this mixture cool for 3 minutes. Pour into NutriPro blender jar (small batch fits perfectly). Lock onto base, flip **I (On)**. Blend 30 seconds until completely smooth. Pour this red puree back into vessel. This is your gravy base.',timer:180},
     {text:'Add 1.5 tbsp butter to the puree. Heat at medium. Add Kashmiri chilli powder, coriander powder, salt, a pinch of sugar. Stir and cook 2 minutes. The colour will deepen to restaurant-red.',timer:120},
     {text:'Add 50ml milk or cream. Stir well. Add paneer cubes. Stir gently so paneer does not break. Cook 3 minutes on low heat.',timer:180},
     {text:'Add garam masala. Stir once. Taste — adjust salt. If too thick, add 2 tbsp water.',timer:0},
