@@ -308,6 +308,20 @@ body{display:flex;flex-direction:column;max-width:480px;margin:0 auto;min-height
 .pill-green{background:rgba(92,122,62,.12);color:var(--olive2)}
 .pill-orange{background:rgba(232,108,58,.12);color:var(--accent2)}
 
+/* ── EQUIPMENT GUIDE ── */
+.equip-section{margin-bottom:18px}
+.equip-section-title{font-size:13px;font-weight:800;color:var(--accent);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:6px}
+.equip-table{width:100%;border-collapse:collapse;font-size:13px}
+.equip-table th{text-align:left;color:var(--text3);font-weight:600;padding:4px 8px;font-size:11px;text-transform:uppercase;letter-spacing:.3px;border-bottom:2px solid var(--border)}
+.equip-table td{padding:7px 8px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:top}
+.equip-table tr:last-child td{border:none}
+.equip-table td:first-child{color:var(--text2);font-weight:600;white-space:nowrap}
+.equip-table td code{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-size:12px;color:var(--accent2);font-family:monospace}
+.equip-device-header{background:var(--bg2);border-radius:10px;padding:10px 12px;margin-bottom:10px;display:flex;align-items:center;gap:10px}
+.equip-device-icon{font-size:28px}
+.equip-device-name{font-size:14px;font-weight:700;color:var(--text)}
+.equip-device-model{font-size:12px;color:var(--text3)}
+
 /* Scrollbar */
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -328,6 +342,7 @@ body{display:flex;flex-direction:column;max-width:480px;margin:0 auto;min-height
   <h1>🍽️ Bachelor Meals</h1>
   <div id="header-right">
     <button class="icon-btn" id="surprise-nav-btn" title="Surprise Meal" onclick="showSurprise()">🎲</button>
+    <button class="icon-btn" onclick="openEquipmentGuide()" title="Equipment Guide">🔌</button>
     <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
   </div>
 </header>
@@ -1453,6 +1468,97 @@ function toggleCookIngredients(){
   const arrow = document.getElementById('cm-ing-arrow');
   body.classList.toggle('open');
   arrow.textContent = body.classList.contains('open') ? '▲' : '▼';
+}
+
+// ── EQUIPMENT GUIDE ──
+function openEquipmentGuide(){
+  const sheet = document.getElementById('recipe-sheet');
+  const overlay = document.getElementById('recipe-overlay');
+  sheet.innerHTML = `
+  <div class="recipe-header" style="padding-bottom:16px">
+    <button class="recipe-close" onclick="document.getElementById('recipe-overlay').classList.remove('open')">✕</button>
+    <div style="font-size:28px;margin-bottom:6px">🔌</div>
+    <div class="recipe-title">Equipment Guide</div>
+    <div class="recipe-title-ta">Your exact devices — buttons &amp; settings</div>
+  </div>
+  <div style="padding:0 16px 30px">
+
+    <div class="equip-section">
+      <div class="equip-device-header">
+        <div class="equip-device-icon">🔥</div>
+        <div><div class="equip-device-name">V-Guard VIC 10 Induction Cooktop</div>
+        <div class="equip-device-model">Wattage: 120W–2000W · Press <strong>+</strong> / <strong>−</strong> to set</div></div>
+      </div>
+      <table class="equip-table">
+        <tr><th>Recipe says</th><th>Press on V-Guard</th></tr>
+        <tr><td>Boil water fast</td><td><code>Water</code> preset</td></tr>
+        <tr><td>Simmer dal / soup</td><td><code>Soup</code> preset</td></tr>
+        <tr><td>Medium heat (onions, eggs)</td><td><code>+</code> to 1000–1200W</td></tr>
+        <tr><td>Medium-high (sauté, dosa)</td><td><code>Fry</code> preset · 1400W</td></tr>
+        <tr><td>High (roti, grilling)</td><td><code>Fry</code> preset · press <code>+</code> to 1600W</td></tr>
+        <tr><td>Very high (roti puffing)</td><td><code>Fry</code> + <code>+</code> to 1800W</td></tr>
+        <tr><td>Shallow / deep frying</td><td><code>Deep Fry</code> preset</td></tr>
+        <tr><td>Low simmer / keep warm</td><td><code>−</code> to 600–700W</td></tr>
+      </table>
+    </div>
+
+    <div class="equip-section">
+      <div class="equip-device-header">
+        <div class="equip-device-icon">🫖</div>
+        <div><div class="equip-device-name">AGARO Regency Multi-Cook Kettle</div>
+        <div class="equip-device-model">1.2L · 600W · Rotary knob</div></div>
+      </div>
+      <table class="equip-table">
+        <tr><th>Task</th><th>Knob position</th></tr>
+        <tr><td>Boil water / cook eggs / tea</td><td><code>II (High)</code> — full boil</td></tr>
+        <tr><td>Simmer / keep warm / milk</td><td><code>I (Low)</code> — gentle heat</td></tr>
+        <tr><td>Off</td><td><code>OFF</code></td></tr>
+      </table>
+      <div style="margin-top:8px;font-size:12px;color:var(--text3);background:var(--bg2);border-radius:8px;padding:8px 10px">
+        💡 This kettle can also cook food directly: oats, moong dal, simple soups, noodles. Use setting II to boil, then switch to I to simmer.
+      </div>
+    </div>
+
+    <div class="equip-section">
+      <div class="equip-device-header">
+        <div class="equip-device-icon">⚙️</div>
+        <div><div class="equip-device-name">Inalsa Easy Prep Food Processor</div>
+        <div class="equip-device-model">800W · 1.4L bowl · Dual safety lock</div></div>
+      </div>
+      <table class="equip-table">
+        <tr><th>Task</th><th>Setting</th></tr>
+        <tr><td>Chop onions / herbs</td><td><code>P (Pulse)</code> — 3–4 bursts</td></tr>
+        <tr><td>Blend chutney / gravy</td><td><code>2 (High)</code> — 20–30 sec</td></tr>
+        <tr><td>Knead roti / paratha dough</td><td>Kneading blade → <code>2 (High)</code> → 60 sec</td></tr>
+        <tr><td>Whisk eggs / batter</td><td><code>1 (Low)</code> — 20 sec</td></tr>
+        <tr><td>Grate paneer / veg</td><td>Shredding disc → <code>2 (High)</code></td></tr>
+        <tr><td>Mince chicken (keema)</td><td><code>P (Pulse)</code> — 5–6 bursts max</td></tr>
+      </table>
+      <div style="margin-top:8px;font-size:12px;color:var(--text3);background:var(--bg2);border-radius:8px;padding:8px 10px">
+        ⚠️ Dual safety lock: bowl AND lid must both click before motor starts. If it won't run, press both firmly until they click.
+      </div>
+    </div>
+
+    <div class="equip-section">
+      <div class="equip-device-header">
+        <div class="equip-device-icon">🥘</div>
+        <div><div class="equip-device-name">Nutricook Smart Pot</div>
+        <div class="equip-device-model">Pressure cooker · Multi-preset</div></div>
+      </div>
+      <table class="equip-table">
+        <tr><th>Food</th><th>Button sequence</th></tr>
+        <tr><td>Sauté / browning</td><td><code>Sauté</code> → <code>Start</code></td></tr>
+        <tr><td>Rice alone</td><td><code>Rice</code> → <code>Start</code></td></tr>
+        <tr><td>Dal / chickpeas</td><td><code>Bean</code> → set time → <code>Start</code></td></tr>
+        <tr><td>Chicken curry</td><td><code>Meat</code> → 12 min → <code>Start</code></td></tr>
+        <tr><td>Biryani (mixed)</td><td><code>Pressure Cook</code> → 7 min → <code>Start</code></td></tr>
+        <tr><td>After cooking</td><td><code>Cancel</code> → wait float valve → open lid</td></tr>
+      </table>
+    </div>
+
+  </div>`;
+  overlay.classList.add('open');
+  overlay.scrollTop = 0;
 }
 </script>
 </body>
