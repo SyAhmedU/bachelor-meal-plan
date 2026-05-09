@@ -176,6 +176,38 @@ body{display:flex;flex-direction:column;max-width:480px;margin:0 auto;min-height
 .cook-it-btn{display:block;width:calc(100% - 32px);margin:14px 16px 0;background:var(--accent);color:#fff;border:none;border-radius:12px;padding:14px;font-size:16px;font-weight:700;cursor:pointer;transition:background .2s}
 .cook-it-btn:hover{background:var(--accent2)}
 .cook-it-btn.done{background:var(--olive)}
+.start-cooking-btn{display:block;width:calc(100% - 32px);margin:6px 16px 0;background:var(--olive);color:#fff;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;transition:background .2s}
+.start-cooking-btn:hover{background:var(--olive2)}
+
+/* ── COOKING MODE ── */
+#cooking-overlay{display:none;position:fixed;inset:0;z-index:300;background:var(--bg);overflow-y:auto;flex-direction:column}
+#cooking-overlay.open{display:flex}
+.cook-mode-header{background:var(--card);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10}
+.cook-mode-close{background:none;border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer;color:var(--text2)}
+.cook-mode-title{flex:1;font-size:14px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cook-mode-counter{font-size:13px;font-weight:700;color:var(--accent);white-space:nowrap}
+.cook-mode-progress{height:4px;background:var(--bg3)}
+.cook-mode-progress-fill{height:100%;background:var(--olive);transition:width .4s}
+.cook-mode-body{flex:1;padding:20px 16px 0;display:flex;flex-direction:column;gap:16px}
+.cook-step-card{background:var(--card);border:2px solid var(--accent);border-radius:16px;padding:20px;min-height:120px;display:flex;align-items:flex-start;gap:14px}
+.cook-step-num{width:36px;height:36px;background:var(--accent);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;flex-shrink:0}
+.cook-step-text{font-size:17px;line-height:1.6;color:var(--text);font-weight:500}
+.cook-timer-section{display:flex;flex-direction:column;align-items:center;gap:10px;padding:8px 0}
+.cook-timer-circle{width:140px;height:140px;border-radius:50%;border:6px solid var(--bg3);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:border-color .2s;position:relative;background:var(--card)}
+.cook-timer-circle.running{border-color:var(--accent);animation:pulse 2s infinite}
+.cook-timer-circle.done-flash{border-color:var(--olive);background:rgba(92,122,62,.08)}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(232,108,58,.3)}50%{box-shadow:0 0 0 12px rgba(232,108,58,.0)}}
+.cook-timer-time{font-size:32px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums;line-height:1}
+.cook-timer-label{font-size:12px;color:var(--text3);margin-top:2px}
+.cook-timer-tap{font-size:12px;color:var(--text3);text-align:center}
+.cook-nav-row{display:flex;gap:10px;padding:16px 0 30px}
+.cook-prev-btn{flex:1;background:var(--bg2);color:var(--text2);border:1px solid var(--border);border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer}
+.cook-next-btn{flex:2;background:var(--accent);color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer}
+.cook-next-btn:disabled{background:var(--bg3);color:var(--text3)}
+.cook-next-btn.finish{background:var(--olive)}
+.cook-ingredients-toggle{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:600;color:var(--text2)}
+.cook-ingredients-body{display:none;margin-top:8px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px}
+.cook-ingredients-body.open{display:block}
 
 /* ── FRIDGE CHECKER ── */
 .fridge-intro{font-size:13px;color:var(--text3);margin-bottom:14px}
@@ -442,11 +474,45 @@ body{display:flex;flex-direction:column;max-width:480px;margin:0 auto;min-height
       <button class="rate-btn" id="rate-like" onclick="rateRecipe('like')">👍</button>
       <button class="rate-btn" id="rate-dislike" onclick="rateRecipe('dislike')">👎</button>
     </div>
+    <button class="start-cooking-btn" onclick="startCookingMode()">🍳 Start Cooking — Step by Step</button>
     <button class="cook-it-btn" id="cook-it-btn" onclick="markCooked()">✅ Mark as cooked</button>
     <div style="padding:0 16px;margin-top:10px">
       <a id="ro-video-link" href="#" target="_blank" style="font-size:13px;color:var(--text3);display:flex;align-items:center;gap:5px">
         🎥 <span id="ro-video-text">Watch on YouTube</span>
       </a>
+    </div>
+  </div>
+</div>
+
+<!-- COOKING MODE OVERLAY -->
+<div id="cooking-overlay">
+  <div class="cook-mode-header">
+    <button class="cook-mode-close" onclick="exitCookingMode()">✕ Exit</button>
+    <div class="cook-mode-title" id="cm-title"></div>
+    <div class="cook-mode-counter" id="cm-counter">Step 1 of 1</div>
+  </div>
+  <div class="cook-mode-progress"><div class="cook-mode-progress-fill" id="cm-progress" style="width:0%"></div></div>
+  <div class="cook-mode-body">
+    <div class="cook-step-card" id="cm-step-card">
+      <div class="cook-step-num" id="cm-step-num">1</div>
+      <div class="cook-step-text" id="cm-step-text"></div>
+    </div>
+    <div class="cook-timer-section" id="cm-timer-section" style="display:none">
+      <div class="cook-timer-circle" id="cm-timer-circle" onclick="toggleCookTimer()">
+        <div class="cook-timer-time" id="cm-timer-time">0s</div>
+        <div class="cook-timer-label" id="cm-timer-label">tap to start</div>
+      </div>
+      <div class="cook-timer-tap" id="cm-timer-tap">Tap the circle to start/stop timer</div>
+    </div>
+    <div>
+      <div class="cook-ingredients-toggle" onclick="toggleCookIngredients()">
+        📋 All ingredients <span id="cm-ing-arrow">▼</span>
+      </div>
+      <div class="cook-ingredients-body" id="cm-ingredients-body"></div>
+    </div>
+    <div class="cook-nav-row">
+      <button class="cook-prev-btn" id="cm-prev" onclick="cookStep(-1)">◀ Prev</button>
+      <button class="cook-next-btn" id="cm-next" onclick="cookStep(1)">Next ▶</button>
     </div>
   </div>
 </div>
@@ -1247,6 +1313,147 @@ function init(){
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+// ── COOKING MODE ──
+let CM = { stepIdx: 0, meal: null, timerRemaining: 0, timerOriginal: 0, timerInterval: null, timerRunning: false };
+
+function startCookingMode(){
+  const m = STATE.currentMeal;
+  if(!m || !m.steps || !m.steps.length) return;
+  CM.meal = m;
+  CM.stepIdx = 0;
+  stopCookTimer();
+  renderCookStep();
+  // Build ingredient list once
+  buildCookIngredients(m);
+  document.getElementById('cooking-overlay').classList.add('open');
+  document.getElementById('cooking-overlay').scrollTop = 0;
+}
+
+function exitCookingMode(){
+  stopCookTimer();
+  document.getElementById('cooking-overlay').classList.remove('open');
+}
+
+function renderCookStep(){
+  const m = CM.meal;
+  const steps = m.steps;
+  const idx = CM.stepIdx;
+  const step = steps[idx];
+  const total = steps.length;
+
+  document.getElementById('cm-title').textContent = m.emoji + ' ' + m.name;
+  document.getElementById('cm-counter').textContent = 'Step '+(idx+1)+' of '+total;
+  document.getElementById('cm-progress').style.width = (((idx+1)/total)*100)+'%';
+  document.getElementById('cm-step-num').textContent = idx+1;
+  document.getElementById('cm-step-text').textContent = step.text;
+
+  // Timer
+  const timerSec = document.getElementById('cm-timer-section');
+  stopCookTimer();
+  if(step.timer && step.timer > 0){
+    timerSec.style.display = 'flex';
+    CM.timerOriginal = step.timer;
+    CM.timerRemaining = step.timer;
+    CM.timerRunning = false;
+    updateCookTimerDisplay();
+    const circle = document.getElementById('cm-timer-circle');
+    circle.className = 'cook-timer-circle';
+    document.getElementById('cm-timer-label').textContent = 'tap to start';
+  } else {
+    timerSec.style.display = 'none';
+  }
+
+  // Prev button
+  const prev = document.getElementById('cm-prev');
+  prev.disabled = idx === 0;
+  prev.style.opacity = idx === 0 ? '.4' : '1';
+
+  // Next button
+  const next = document.getElementById('cm-next');
+  if(idx === total - 1){
+    next.textContent = '✅ Done — Mark as Cooked';
+    next.className = 'cook-next-btn finish';
+  } else {
+    next.textContent = 'Next Step ▶';
+    next.className = 'cook-next-btn';
+  }
+}
+
+function cookStep(dir){
+  const steps = CM.meal.steps;
+  const newIdx = CM.stepIdx + dir;
+  if(newIdx < 0) return;
+  if(newIdx >= steps.length){
+    // Last step done — mark cooked and exit
+    exitCookingMode();
+    markCooked();
+    return;
+  }
+  stopCookTimer();
+  CM.stepIdx = newIdx;
+  renderCookStep();
+  document.getElementById('cooking-overlay').scrollTop = 0;
+}
+
+function toggleCookTimer(){
+  if(CM.timerRunning){
+    stopCookTimer();
+    document.getElementById('cm-timer-circle').className = 'cook-timer-circle';
+    document.getElementById('cm-timer-label').textContent = 'tap to resume';
+  } else {
+    CM.timerRunning = true;
+    document.getElementById('cm-timer-circle').className = 'cook-timer-circle running';
+    document.getElementById('cm-timer-label').textContent = 'tap to pause';
+    CM.timerInterval = setInterval(()=>{
+      CM.timerRemaining--;
+      updateCookTimerDisplay();
+      if(CM.timerRemaining <= 0){
+        stopCookTimer();
+        if('vibrate' in navigator) navigator.vibrate([300,100,300,100,300]);
+        const circle = document.getElementById('cm-timer-circle');
+        circle.className = 'cook-timer-circle done-flash';
+        document.getElementById('cm-timer-time').textContent = '✅';
+        document.getElementById('cm-timer-label').textContent = 'Done!';
+        document.getElementById('cm-timer-tap').textContent = 'Timer finished — go to next step';
+      }
+    }, 1000);
+  }
+}
+
+function stopCookTimer(){
+  if(CM.timerInterval){ clearInterval(CM.timerInterval); CM.timerInterval = null; }
+  CM.timerRunning = false;
+}
+
+function updateCookTimerDisplay(){
+  const s = CM.timerRemaining;
+  const m = Math.floor(s/60);
+  const sec = s % 60;
+  const display = m > 0 ? m+'m '+String(sec).padStart(2,'0')+'s' : s+'s';
+  document.getElementById('cm-timer-time').textContent = display;
+}
+
+function buildCookIngredients(m){
+  const body = document.getElementById('cm-ingredients-body');
+  body.innerHTML = '';
+  (m.ingredients||[]).forEach(ing=>{
+    const qty = ing.qty ? formatQty(ing.qty * STATE.serving)+' '+ing.unit : '';
+    const div = document.createElement('div');
+    div.style.cssText = 'display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px';
+    div.innerHTML = `<span style="font-size:18px;width:24px;text-align:center">${ing.emoji||'🥄'}</span>
+      <span style="flex:1;color:var(--text)">${ing.name}</span>
+      <span style="font-weight:700;color:var(--accent)">${qty}</span>`;
+    body.appendChild(div);
+  });
+}
+
+function toggleCookIngredients(){
+  const body = document.getElementById('cm-ingredients-body');
+  const arrow = document.getElementById('cm-ing-arrow');
+  body.classList.toggle('open');
+  arrow.textContent = body.classList.contains('open') ? '▲' : '▼';
+}
 </script>
 </body>
 </html>
