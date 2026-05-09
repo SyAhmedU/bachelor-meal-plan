@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bachelor Meal Planning</title>
+<style>
+:root {
+  --bg: #FFFBF5;
+  --bg2: #FFF5E8;
+  --bg3: #FFE8CC;
+  --card: #FFFFFF;
+  --border: #E8D5BC;
+  --text: #2C1A0E;
+  --text2: #6B4226;
+  --text3: #9C6B47;
+  --accent: #E86C3A;
+  --accent2: #C9541E;
+  --olive: #5C7A3E;
+  --olive2: #4A6330;
+  --purple: #7B5EA7;
+  --gold: #D4A017;
+  --radius: 12px;
+  --shadow: 0 2px 12px rgba(44,26,14,0.10);
+  --shadow-lg: 0 8px 32px rgba(44,26,14,0.16);
+}
+[data-theme="dark"] {
+  --bg: #1A0F07;
+  --bg2: #2A1A0E;
+  --bg3: #3A2414;
+  --card: #2A1A0E;
+  --border: #4A3020;
+  --text: #F5E6D3;
+  --text2: #D4A882;
+  --text3: #A0785A;
+  --accent: #F07A45;
+  --accent2: #E86C3A;
+  --olive: #7AAD55;
+  --olive2: #5C7A3E;
+  --purple: #9B7EC7;
+  --gold: #E8B830;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.5}
+body{display:flex;flex-direction:column;max-width:480px;margin:0 auto;min-height:100dvh;position:relative}
+
+/* ── HEADER ── */
+#app-header{position:sticky;top:0;z-index:100;background:var(--card);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+#app-header h1{font-size:17px;font-weight:700;color:var(--accent);flex:1}
+#header-right{display:flex;gap:8px;align-items:center}
+.icon-btn{background:none;border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:16px;color:var(--text2);transition:background .2s}
+.icon-btn:hover{background:var(--bg2)}
+
+/* ── BOTTOM NAV ── */
+#bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--card);border-top:1px solid var(--border);display:flex;z-index:100}
+.nav-btn{flex:1;border:none;background:none;padding:8px 4px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--text3);font-size:10px;font-weight:500;transition:color .2s}
+.nav-btn .nav-icon{font-size:22px;line-height:1}
+.nav-btn.active{color:var(--accent)}
+.nav-btn.active .nav-icon{transform:scale(1.1)}
+
+/* ── MAIN CONTENT ── */
+#main{flex:1;overflow-y:auto;padding:0 0 72px}
+.section{display:none;padding:16px}
+.section.active{display:block}
+
+/* ── CARDS ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
+.card-title{font-size:14px;font-weight:700;color:var(--text2);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+
+/* ── HOME ── */
+.greeting-card{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none}
+.greeting-card .time-of-day{font-size:13px;opacity:.85}
+.greeting-card h2{font-size:22px;font-weight:800;margin:4px 0 2px}
+.greeting-card .sub{font-size:13px;opacity:.88}
+.greeting-card .suggest-label{margin-top:12px;font-size:12px;opacity:.8;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.meal-suggest-chips{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
+.meal-chip{background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:20px;padding:5px 12px;font-size:13px;cursor:pointer;transition:background .2s}
+.meal-chip:hover{background:rgba(255,255,255,.35)}
+
+.protein-bar-wrap{margin-top:4px}
+.protein-bar-label{display:flex;justify-content:space-between;font-size:13px;color:var(--text2);margin-bottom:6px}
+.protein-bar-bg{background:var(--bg3);border-radius:20px;height:10px;overflow:hidden}
+.protein-bar-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,var(--olive),var(--olive2));transition:width .6s}
+.protein-goal-text{font-size:12px;color:var(--text3);margin-top:4px}
+
+.timeline-list{display:flex;flex-direction:column;gap:10px}
+.timeline-item{display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--bg2);border-radius:10px;cursor:pointer;transition:background .2s}
+.timeline-item:hover{background:var(--bg3)}
+.timeline-emoji{font-size:28px;line-height:1}
+.timeline-info{flex:1;min-width:0}
+.timeline-slot{font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase}
+.timeline-name{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.timeline-meta{font-size:12px;color:var(--text3)}
+.timeline-check{font-size:18px;color:var(--olive)}
+.timeline-empty{font-size:13px;color:var(--text3);font-style:italic;padding:6px 0}
+
+.tonight-card{background:var(--bg2);border:2px dashed var(--border)}
+.tonight-list{list-style:none;display:flex;flex-direction:column;gap:6px}
+.tonight-list li{font-size:13px;color:var(--text2);padding:4px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:6px}
+.tonight-list li:last-child{border:none}
+.tonight-list li::before{content:'🌙';flex-shrink:0}
+
+/* ── MEAL BROWSER ── */
+.tab-row{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px}
+.tab-btn{flex-shrink:0;border:1px solid var(--border);background:var(--bg2);color:var(--text2);border-radius:20px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
+.tab-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.effort-row{display:flex;gap:6px;margin-bottom:14px}
+.effort-btn{flex:1;border:1px solid var(--border);background:none;color:var(--text3);border-radius:8px;padding:6px 4px;font-size:12px;cursor:pointer;transition:all .2s;text-align:center}
+.effort-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(232,108,58,.08)}
+.meal-grid{display:flex;flex-direction:column;gap:10px}
+.meal-card{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;cursor:pointer;transition:box-shadow .2s,transform .1s;box-shadow:var(--shadow)}
+.meal-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-1px)}
+.meal-card-emoji{font-size:36px;line-height:1;flex-shrink:0}
+.meal-card-info{flex:1;min-width:0}
+.meal-card-name{font-size:15px;font-weight:700;color:var(--text);margin-bottom:2px}
+.meal-card-sub{font-size:12px;color:var(--text3)}
+.meal-card-badges{display:flex;gap:5px;margin-top:5px;flex-wrap:wrap}
+.badge{border-radius:6px;padding:2px 8px;font-size:11px;font-weight:600}
+.badge-effort-simple{background:#E8F5E9;color:#2E7D32}
+.badge-effort-medium{background:#FFF3E0;color:#E65100}
+.badge-effort-hard{background:#F3E5F5;color:#6A1B9A}
+[data-theme="dark"] .badge-effort-simple{background:#1B3A1E;color:#81C784}
+[data-theme="dark"] .badge-effort-medium{background:#3A2000;color:#FFB74D}
+[data-theme="dark"] .badge-effort-hard{background:#2A0D3A;color:#CE93D8}
+.badge-protein{background:rgba(92,122,62,.12);color:var(--olive2);font-size:11px}
+.badge-cal{background:rgba(212,160,23,.12);color:var(--gold);font-size:11px}
+.badge-time{background:var(--bg2);color:var(--text3)}
+.meal-card-rating{font-size:18px;flex-shrink:0}
+.no-meals{text-align:center;color:var(--text3);padding:40px 0;font-size:14px}
+
+/* ── RECIPE DETAIL OVERLAY ── */
+#recipe-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.5);overflow-y:auto}
+#recipe-overlay.open{display:block}
+.recipe-sheet{background:var(--card);border-radius:var(--radius) var(--radius) 0 0;margin-top:60px;min-height:calc(100dvh - 60px);padding:0 0 40px;max-width:480px;margin-left:auto;margin-right:auto;position:relative}
+.recipe-header{padding:20px 16px 12px;border-bottom:1px solid var(--border)}
+.recipe-close{position:absolute;top:16px;right:16px;background:var(--bg2);border:1px solid var(--border);border-radius:50%;width:34px;height:34px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2)}
+.recipe-emoji-big{font-size:56px;line-height:1;margin-bottom:8px}
+.recipe-title{font-size:20px;font-weight:800;color:var(--text);margin-bottom:2px}
+.recipe-title-ta{font-size:13px;color:var(--text3);margin-bottom:8px}
+.recipe-meta-row{display:flex;gap:8px;flex-wrap:wrap}
+
+.serving-row{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--border)}
+.serving-row label{font-size:13px;color:var(--text2);font-weight:600}
+.serving-btns{display:flex;gap:4px;margin-left:auto}
+.serving-btn{border:1px solid var(--border);background:var(--bg2);border-radius:8px;width:34px;height:34px;font-size:15px;font-weight:700;cursor:pointer;color:var(--text2);display:flex;align-items:center;justify-content:center}
+.serving-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+.recipe-section{padding:14px 16px;border-bottom:1px solid var(--border)}
+.recipe-section-title{font-size:13px;font-weight:700;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.4px}
+.ingredient-list{display:flex;flex-direction:column;gap:7px}
+.ingredient-item{display:flex;align-items:center;gap:10px;font-size:14px}
+.ing-emoji{font-size:22px;width:28px;text-align:center;flex-shrink:0}
+.ing-name{flex:1;color:var(--text)}
+.ing-name-ta{font-size:11px;color:var(--text3)}
+.ing-qty{font-weight:700;color:var(--accent);white-space:nowrap}
+
+.steps-list{display:flex;flex-direction:column;gap:10px}
+.step-item{display:flex;gap:10px;align-items:flex-start}
+.step-num{flex-shrink:0;width:26px;height:26px;background:var(--accent);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin-top:2px}
+.step-content{flex:1}
+.step-text{font-size:14px;color:var(--text);line-height:1.5}
+.step-timer-btn{display:inline-flex;align-items:center;gap:5px;margin-top:6px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:4px 10px;font-size:12px;cursor:pointer;color:var(--text2);font-weight:600}
+.step-timer-btn.running{background:rgba(232,108,58,.12);border-color:var(--accent);color:var(--accent)}
+.step-timer-display{font-variant-numeric:tabular-nums}
+
+.recipe-tip{background:var(--bg2);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;padding:10px 12px;font-size:13px;color:var(--text2);margin-top:4px}
+
+.rating-row{display:flex;gap:12px;align-items:center;padding:14px 16px}
+.rating-row label{font-size:13px;color:var(--text2);font-weight:600;flex:1}
+.rate-btn{border:1px solid var(--border);background:var(--bg2);border-radius:10px;padding:8px 16px;font-size:18px;cursor:pointer;transition:background .2s}
+.rate-btn:hover{background:var(--bg3)}
+.rate-btn.selected-like{background:#E8F5E9;border-color:var(--olive)}
+.rate-btn.selected-dislike{background:#FFEBEE;border-color:#C62828}
+[data-theme="dark"] .rate-btn.selected-like{background:#1B3A1E}
+[data-theme="dark"] .rate-btn.selected-dislike{background:#3A0A0E}
+.cook-it-btn{display:block;width:calc(100% - 32px);margin:14px 16px 0;background:var(--accent);color:#fff;border:none;border-radius:12px;padding:14px;font-size:16px;font-weight:700;cursor:pointer;transition:background .2s}
+.cook-it-btn:hover{background:var(--accent2)}
+.cook-it-btn.done{background:var(--olive)}
+
+/* ── FRIDGE CHECKER ── */
+.fridge-intro{font-size:13px;color:var(--text3);margin-bottom:14px}
+.fridge-cats{display:flex;flex-direction:column;gap:12px}
+.fridge-cat-title{font-size:13px;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px}
+.fridge-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fridge-item{display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:8px 10px;cursor:pointer;transition:background .2s}
+.fridge-item.checked{background:rgba(92,122,62,.10);border-color:var(--olive)}
+.fridge-cb{width:18px;height:18px;border:2px solid var(--border);border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .2s}
+.fridge-item.checked .fridge-cb{background:var(--olive);border-color:var(--olive);color:#fff}
+.fridge-label{font-size:13px;color:var(--text);font-weight:500}
+.fridge-emoji{font-size:18px}
+.fridge-suggest-btn{width:100%;margin-top:16px;background:var(--accent);color:#fff;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:700;cursor:pointer}
+.fridge-results{margin-top:16px}
+
+/* ── PLANNER ── */
+.week-grid{display:flex;flex-direction:column;gap:10px}
+.day-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.day-header{background:var(--bg2);padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
+.day-name{font-size:14px;font-weight:700;color:var(--text)}
+.day-date{font-size:12px;color:var(--text3)}
+.day-meals{padding:10px 14px;display:flex;flex-direction:column;gap:7px}
+.day-slot{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2)}
+.day-slot-label{width:60px;font-weight:600;color:var(--text3);font-size:12px;text-transform:uppercase;flex-shrink:0}
+.day-slot-meal{flex:1;background:var(--bg2);border-radius:7px;padding:5px 10px;cursor:pointer;min-height:30px;display:flex;align-items:center;gap:6px;color:var(--text);transition:background .2s}
+.day-slot-meal:hover{background:var(--bg3)}
+.day-slot-meal.empty{color:var(--text3);font-style:italic;font-size:12px}
+.planner-hint{font-size:12px;color:var(--text3);text-align:center;margin-bottom:12px}
+
+/* ── MEAL PICKER FOR PLANNER ── */
+#meal-picker-overlay{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.5)}
+#meal-picker-overlay.open{display:flex;align-items:flex-end;justify-content:center}
+.meal-picker-sheet{background:var(--card);border-radius:var(--radius) var(--radius) 0 0;width:100%;max-width:480px;max-height:75dvh;overflow:hidden;display:flex;flex-direction:column}
+.meal-picker-head{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.meal-picker-title{font-size:16px;font-weight:700;color:var(--text)}
+.meal-picker-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--text3)}
+.meal-picker-list{overflow-y:auto;flex:1;padding:10px}
+.meal-picker-item{display:flex;align-items:center;gap:10px;padding:10px 8px;border-radius:10px;cursor:pointer;transition:background .2s}
+.meal-picker-item:hover{background:var(--bg2)}
+.meal-picker-emoji{font-size:28px}
+.meal-picker-info{}
+.meal-picker-name{font-size:14px;font-weight:600;color:var(--text)}
+.meal-picker-meta{font-size:12px;color:var(--text3)}
+
+/* ── HISTORY ── */
+.history-list{display:flex;flex-direction:column;gap:10px}
+.history-item{display:flex;gap:10px;align-items:flex-start;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px}
+.history-emoji{font-size:30px;flex-shrink:0}
+.history-info{flex:1}
+.history-name{font-size:14px;font-weight:700;color:var(--text)}
+.history-meta{font-size:12px;color:var(--text3);margin-top:2px}
+.history-rating{font-size:18px}
+.history-empty{text-align:center;color:var(--text3);padding:40px 0;font-size:14px}
+.clear-history-btn{width:100%;margin-top:12px;background:none;border:1px solid var(--border);color:var(--text3);border-radius:10px;padding:10px;font-size:13px;cursor:pointer}
+
+/* ── SHOPPING LIST ── */
+.shopping-filters{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.shopping-meal-chip{border:1px solid var(--border);background:var(--bg2);color:var(--text2);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s}
+.shopping-meal-chip.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.shopping-section-title{font-size:13px;font-weight:700;color:var(--text2);margin:12px 0 6px;text-transform:uppercase;letter-spacing:.4px}
+.shopping-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--card);border:1px solid var(--border);border-radius:9px;margin-bottom:6px;cursor:pointer}
+.shopping-item.got{opacity:.5;text-decoration:line-through}
+.shopping-item .si-cb{width:18px;height:18px;border:2px solid var(--border);border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px}
+.shopping-item.got .si-cb{background:var(--olive);border-color:var(--olive);color:#fff}
+.shopping-item .si-emoji{font-size:18px}
+.shopping-item .si-name{flex:1;font-size:14px;color:var(--text)}
+.shopping-item .si-qty{font-size:13px;font-weight:700;color:var(--accent);white-space:nowrap}
+.whatsapp-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:16px;background:#25D366;color:#fff;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:700;cursor:pointer}
+.whatsapp-btn:hover{background:#1DA851}
+
+/* ── PANTRY ── */
+.pantry-intro{font-size:13px;color:var(--text3);margin-bottom:14px}
+.pantry-grid{display:flex;flex-direction:column;gap:8px}
+.pantry-row{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+.pantry-emoji{font-size:22px;width:28px;text-align:center;flex-shrink:0}
+.pantry-info{flex:1;min-width:0}
+.pantry-name{font-size:14px;font-weight:600;color:var(--text)}
+.pantry-detail{font-size:12px;color:var(--text3)}
+.pantry-price{font-size:13px;font-weight:700;color:var(--olive2);white-space:nowrap}
+.pantry-freq{font-size:11px;color:var(--text3);text-align:right;white-space:nowrap}
+.pantry-freq.weekly{color:var(--accent)}
+
+/* ── SURPRISE ── */
+.surprise-wrap{display:flex;flex-direction:column;align-items:center;padding:30px 0}
+.surprise-emoji-big{font-size:80px;line-height:1;margin-bottom:16px}
+.surprise-name{font-size:22px;font-weight:800;color:var(--text);text-align:center;margin-bottom:6px}
+.surprise-meta{font-size:14px;color:var(--text3);text-align:center;margin-bottom:20px}
+.surprise-btn{background:var(--accent);color:#fff;border:none;border-radius:12px;padding:13px 32px;font-size:16px;font-weight:700;cursor:pointer;margin-bottom:12px;transition:background .2s}
+.surprise-btn:hover{background:var(--accent2)}
+.surprise-view-btn{background:var(--bg2);color:var(--text2);border:1px solid var(--border);border-radius:12px;padding:10px 24px;font-size:14px;font-weight:600;cursor:pointer}
+
+/* ── MISC ── */
+.section-heading{font-size:18px;font-weight:800;color:var(--text);margin-bottom:14px}
+.empty-state{text-align:center;color:var(--text3);padding:50px 20px;font-size:14px}
+.empty-state .empty-icon{font-size:48px;margin-bottom:12px}
+
+.pill{display:inline-flex;align-items:center;gap:4px;border-radius:6px;padding:3px 9px;font-size:12px;font-weight:600}
+.pill-green{background:rgba(92,122,62,.12);color:var(--olive2)}
+.pill-orange{background:rgba(232,108,58,.12);color:var(--accent2)}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+/* Transition */
+.section{animation:fadeUp .2s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.surprise-spin{animation:spin .5s ease}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+</style>
+</head>
+<body data-theme="light">
+
+<!-- HEADER -->
+<header id="app-header">
+  <h1>🍽️ Bachelor Meals</h1>
+  <div id="header-right">
+    <button class="icon-btn" id="surprise-nav-btn" title="Surprise Meal" onclick="showSurprise()">🎲</button>
+    <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main id="main">
+
+  <!-- HOME -->
+  <section id="sec-home" class="section active">
+    <div class="card greeting-card" id="greeting-card">
+      <div class="time-of-day" id="time-of-day">Good morning</div>
+      <h2 id="greeting-name">Syed! 👋</h2>
+      <div class="sub" id="greeting-sub">Let's fuel that 6ft frame right.</div>
+      <div class="suggest-label">Suggested now</div>
+      <div class="meal-suggest-chips" id="suggest-chips"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">💪 Protein today</div>
+      <div class="protein-bar-wrap">
+        <div class="protein-bar-label">
+          <span id="protein-today">0g eaten</span>
+          <span id="protein-goal-lbl">Goal: 150g</span>
+        </div>
+        <div class="protein-bar-bg"><div class="protein-bar-fill" id="protein-bar" style="width:0%"></div></div>
+        <div class="protein-goal-text" id="protein-goal-text">Log meals to track your protein</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📅 Today's meals</div>
+      <div class="timeline-list" id="today-timeline"></div>
+    </div>
+
+    <div class="card tonight-card" id="tonight-card">
+      <div class="card-title">🌙 Tonight's prep</div>
+      <ul class="tonight-list" id="tonight-list"></ul>
+    </div>
+  </section>
+
+  <!-- MEALS -->
+  <section id="sec-meals" class="section">
+    <div class="tab-row" id="meal-tabs">
+      <button class="tab-btn active" data-type="breakfast" onclick="setMealTab('breakfast')">🍳 Breakfast</button>
+      <button class="tab-btn" data-type="lunch" onclick="setMealTab('lunch')">🥗 Lunch</button>
+      <button class="tab-btn" data-type="snack" onclick="setMealTab('snack')">🍌 Snack</button>
+      <button class="tab-btn" data-type="dinner" onclick="setMealTab('dinner')">🍛 Dinner</button>
+    </div>
+    <div class="effort-row">
+      <button class="effort-btn active" data-effort="all" onclick="setEffort('all')">All</button>
+      <button class="effort-btn" data-effort="simple" onclick="setEffort('simple')">⚡ Simple</button>
+      <button class="effort-btn" data-effort="medium" onclick="setEffort('medium')">🔥 Medium</button>
+      <button class="effort-btn" data-effort="hard" onclick="setEffort('hard')">👨‍🍳 Hard</button>
+    </div>
+    <div class="meal-grid" id="meal-grid"></div>
+  </section>
+
+  <!-- FRIDGE -->
+  <section id="sec-fridge" class="section">
+    <div class="section-heading">🧊 Fridge Checker</div>
+    <div class="fridge-intro">Tick what you have right now — I'll suggest meals you can cook tonight.</div>
+    <div id="fridge-cats"></div>
+    <button class="fridge-suggest-btn" onclick="suggestFromFridge()">✨ Show meals I can make</button>
+    <div class="fridge-results" id="fridge-results"></div>
+  </section>
+
+  <!-- PLANNER -->
+  <section id="sec-plan" class="section">
+    <div class="section-heading">📆 Weekly Planner</div>
+    <div class="planner-hint">Tap any slot to assign a meal</div>
+    <div class="week-grid" id="week-grid"></div>
+    <button class="fridge-suggest-btn" style="margin-top:12px" onclick="generateShoppingFromPlan()">🛒 Generate shopping list</button>
+  </section>
+
+  <!-- HISTORY -->
+  <section id="sec-history" class="section">
+    <div class="section-heading">📖 History & Favourites</div>
+    <div class="tab-row" style="margin-bottom:14px">
+      <button class="tab-btn active" id="hist-all-btn" onclick="showHistory('all')">All</button>
+      <button class="tab-btn" id="hist-fav-btn" onclick="showHistory('fav')">👍 Favourites</button>
+      <button class="tab-btn" id="hist-dis-btn" onclick="showHistory('dis')">👎 Avoid</button>
+    </div>
+    <div id="history-list" class="history-list"></div>
+    <button class="clear-history-btn" onclick="clearHistory()">Clear history</button>
+  </section>
+
+</main>
+
+<!-- BOTTOM NAV -->
+<nav id="bottom-nav">
+  <button class="nav-btn active" data-sec="home" onclick="showSection('home')">
+    <span class="nav-icon">🏠</span>Home
+  </button>
+  <button class="nav-btn" data-sec="meals" onclick="showSection('meals')">
+    <span class="nav-icon">🍽️</span>Meals
+  </button>
+  <button class="nav-btn" data-sec="fridge" onclick="showSection('fridge')">
+    <span class="nav-icon">🧊</span>Fridge
+  </button>
+  <button class="nav-btn" data-sec="plan" onclick="showSection('plan')">
+    <span class="nav-icon">📆</span>Plan
+  </button>
+  <button class="nav-btn" data-sec="history" onclick="showSection('history')">
+    <span class="nav-icon">📖</span>History
+  </button>
+</nav>
+
+<!-- RECIPE OVERLAY -->
+<div id="recipe-overlay">
+  <div class="recipe-sheet" id="recipe-sheet">
+    <div class="recipe-header">
+      <div class="recipe-emoji-big" id="ro-emoji"></div>
+      <button class="recipe-close" onclick="closeRecipe()">✕</button>
+      <div class="recipe-title" id="ro-name"></div>
+      <div class="recipe-title-ta" id="ro-name-ta"></div>
+      <div class="recipe-meta-row" id="ro-meta"></div>
+    </div>
+    <div class="serving-row">
+      <label>Servings</label>
+      <div class="serving-btns" id="serving-btns">
+        <button class="serving-btn active" data-s="1" onclick="setServing(1)">1</button>
+        <button class="serving-btn" data-s="2" onclick="setServing(2)">2</button>
+        <button class="serving-btn" data-s="3" onclick="setServing(3)">3</button>
+      </div>
+    </div>
+    <div class="recipe-section">
+      <div class="recipe-section-title">Ingredients</div>
+      <div class="ingredient-list" id="ro-ingredients"></div>
+    </div>
+    <div class="recipe-section">
+      <div class="recipe-section-title">Steps</div>
+      <div class="steps-list" id="ro-steps"></div>
+    </div>
+    <div class="recipe-section" id="ro-tip-section">
+      <div class="recipe-section-title">Tip</div>
+      <div class="recipe-tip" id="ro-tip"></div>
+    </div>
+    <div class="recipe-section" id="ro-nightprep-section" style="display:none">
+      <div class="recipe-section-title">🌙 Night Prep</div>
+      <div class="recipe-tip" id="ro-nightprep"></div>
+    </div>
+    <div class="rating-row">
+      <label>How was it?</label>
+      <button class="rate-btn" id="rate-like" onclick="rateRecipe('like')">👍</button>
+      <button class="rate-btn" id="rate-dislike" onclick="rateRecipe('dislike')">👎</button>
+    </div>
+    <button class="cook-it-btn" id="cook-it-btn" onclick="markCooked()">✅ Mark as cooked</button>
+    <div style="padding:0 16px;margin-top:10px">
+      <a id="ro-video-link" href="#" target="_blank" style="font-size:13px;color:var(--text3);display:flex;align-items:center;gap:5px">
+        🎥 <span id="ro-video-text">Watch on YouTube</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- MEAL PICKER OVERLAY (for planner) -->
+<div id="meal-picker-overlay">
+  <div class="meal-picker-sheet">
+    <div class="meal-picker-head">
+      <div class="meal-picker-title" id="picker-title">Pick a meal</div>
+      <button class="meal-picker-close" onclick="closeMealPicker()">✕</button>
+    </div>
+    <div class="meal-picker-list" id="picker-list"></div>
+  </div>
+</div>
+
+
+<script src="meals.js"></script>
+<script>
+// ── STATE ──
+let STATE = {
+  mealType: 'breakfast',
+  effort: 'all',
+  serving: 1,
+  currentMeal: null,
+  stepTimers: {},
+  history: [],
+  ratings: {},
+  plan: {},
+  fridge: {},
+  todayLog: {},
+  theme: 'light',
+  proteinGoal: 150,
+  pickerTarget: null,
+};
+
+// ── STORAGE ──
+function save(key, val){ try{localStorage.setItem('bmp_'+key, JSON.stringify(val))}catch(e){} }
+function load(key, def){ try{const v=localStorage.getItem('bmp_'+key); return v!=null?JSON.parse(v):def}catch(e){return def} }
+
+function loadState(){
+  STATE.history = load('history', []);
+  STATE.ratings = load('ratings', {});
+  STATE.plan    = load('plan', {});
+  STATE.fridge  = load('fridge', {});
+  STATE.todayLog= load('todayLog_'+todayKey(), {});
+  STATE.theme   = load('theme', 'light');
+  STATE.proteinGoal = load('proteinGoal', 150);
+}
+
+function todayKey(){ const d=new Date(); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
+
+// ── THEME ──
+function applyTheme(t){
+  document.body.dataset.theme = t;
+  document.getElementById('theme-btn').textContent = t==='dark'?'☀️':'🌙';
+}
+function toggleTheme(){
+  STATE.theme = STATE.theme==='dark'?'light':'dark';
+  applyTheme(STATE.theme);
+  save('theme', STATE.theme);
+}
+
+// ── NAVIGATION ──
+function showSection(name){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  const sec = document.getElementById('sec-'+name);
+  if(sec) sec.classList.add('active');
+  const btn = document.querySelector('.nav-btn[data-sec="'+name+'"]');
+  if(btn) btn.classList.add('active');
+  if(name==='meals') renderMealGrid();
+  if(name==='history') renderHistory('all');
+  if(name==='fridge') renderFridge();
+  if(name==='plan') renderPlanner();
+  if(name==='home') renderHome();
+}
+
+// ── HOME ──
+function renderHome(){
+  renderGreeting();
+  renderTimeline();
+  renderProtein();
+  renderTonightPrep();
+}
+
+function renderGreeting(){
+  const h = new Date().getHours();
+  let period, sub, greeting;
+  if(h>=5 && h<12){ period='Good morning'; sub="Let's start the day right!"; greeting='morning'; }
+  else if(h>=12 && h<17){ period='Good afternoon'; sub='Midday fuel check.'; greeting='afternoon'; }
+  else if(h>=17 && h<21){ period='Good evening'; sub='Time for a hearty dinner.'; greeting='evening'; }
+  else{ period='Good night'; sub='Sleep well, eat well.'; greeting='night'; }
+  document.getElementById('time-of-day').textContent = period;
+
+  const chips = document.getElementById('suggest-chips');
+  chips.innerHTML = '';
+  let typeMap = {morning:'breakfast', afternoon:'snack', evening:'dinner', night:'dinner'};
+  let type = typeMap[greeting] || 'breakfast';
+  const pool = (window.__MEALS__||[]).filter(m=>m.type===type).slice(0,4);
+  pool.forEach(m=>{
+    const c = document.createElement('button');
+    c.className='meal-chip';
+    c.textContent = m.emoji+' '+m.name.split(' + ')[0];
+    c.onclick = ()=>openRecipe(m.id);
+    chips.appendChild(c);
+  });
+}
+
+function renderTimeline(){
+  const tl = document.getElementById('today-timeline');
+  const slots = [
+    {label:'Breakfast', key:'breakfast', time:'7–8 AM'},
+    {label:'Lunch', key:'lunch', time:'1–2 PM'},
+    {label:'Snack', key:'snack', time:'4–5 PM'},
+    {label:'Dinner', key:'dinner', time:'8–9 PM'},
+  ];
+  tl.innerHTML = '';
+  slots.forEach(s=>{
+    const logged = STATE.todayLog[s.key];
+    const meal = logged ? (window.__MEALS__||[]).find(m=>m.id===logged) : null;
+    const item = document.createElement('div');
+    item.className='timeline-item';
+    if(meal){
+      item.innerHTML = `<div class="timeline-emoji">${meal.emoji}</div>
+        <div class="timeline-info">
+          <div class="timeline-slot">${s.label} · ${s.time}</div>
+          <div class="timeline-name">${meal.name}</div>
+          <div class="timeline-meta">${meal.protein}g protein · ${meal.calories} kcal</div>
+        </div>
+        <div class="timeline-check">✅</div>`;
+      item.onclick = ()=>openRecipe(meal.id);
+    } else {
+      item.innerHTML = `<div class="timeline-emoji">⬜</div>
+        <div class="timeline-info">
+          <div class="timeline-slot">${s.label} · ${s.time}</div>
+          <div class="timeline-name timeline-empty">Not logged yet</div>
+        </div>`;
+      item.onclick = ()=>{ setMealTab(s.key); showSection('meals'); };
+    }
+    tl.appendChild(item);
+  });
+}
+
+function renderProtein(){
+  const meals = (window.__MEALS__||[]);
+  let total=0, cals=0;
+  Object.values(STATE.todayLog).forEach(id=>{
+    const m=meals.find(x=>x.id===id);
+    if(m){ total+=m.protein||0; cals+=m.calories||0; }
+  });
+  const pct = Math.min(100, Math.round(total/STATE.proteinGoal*100));
+  document.getElementById('protein-today').textContent = total+'g eaten ('+cals+' kcal)';
+  document.getElementById('protein-bar').style.width = pct+'%';
+  const left = STATE.proteinGoal - total;
+  document.getElementById('protein-goal-text').textContent = left>0 ? left+'g more to hit your daily goal' : '🎉 Goal reached!';
+}
+
+function renderTonightPrep(){
+  const list = document.getElementById('tonight-list');
+  const preps = (window.__MEALS__||[])
+    .filter(m=>m.nightPrep && m.type==='breakfast')
+    .slice(0,3);
+  list.innerHTML = '';
+  if(!preps.length){
+    list.innerHTML = '<li style="border:none">No prep needed — you\'re good!</li>';
+    return;
+  }
+  preps.forEach(m=>{
+    const li = document.createElement('li');
+    li.innerHTML = `<strong>${m.name}:</strong> ${m.nightPrep}`;
+    list.appendChild(li);
+  });
+}
+
+// ── MEAL BROWSER ──
+function setMealTab(type){
+  STATE.mealType = type;
+  document.querySelectorAll('#meal-tabs .tab-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.type===type);
+  });
+  renderMealGrid();
+}
+
+function setEffort(e){
+  STATE.effort = e;
+  document.querySelectorAll('.effort-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.effort===e);
+  });
+  renderMealGrid();
+}
+
+function renderMealGrid(){
+  const grid = document.getElementById('meal-grid');
+  let meals = (window.__MEALS__||[]).filter(m=>m.type===STATE.mealType);
+  if(STATE.effort!=='all') meals = meals.filter(m=>m.effort===STATE.effort);
+  grid.innerHTML = '';
+  if(!meals.length){
+    grid.innerHTML = '<div class="no-meals">No meals for this filter.<br>Try a different effort level.</div>';
+    return;
+  }
+  meals.forEach(m=>{
+    const rating = STATE.ratings[m.id];
+    const card = document.createElement('div');
+    card.className='meal-card';
+    card.innerHTML = `<div class="meal-card-emoji">${m.emoji}</div>
+      <div class="meal-card-info">
+        <div class="meal-card-name">${m.name}</div>
+        <div class="meal-card-sub">${m.nameTA||''}</div>
+        <div class="meal-card-badges">
+          <span class="badge badge-effort-${m.effort}">${capitalize(m.effort)}</span>
+          <span class="badge badge-time">⏱ ${m.time}min</span>
+          <span class="badge badge-protein">💪 ${m.protein}g</span>
+          <span class="badge badge-cal">🔥 ${m.calories}kcal</span>
+        </div>
+      </div>
+      <div class="meal-card-rating">${rating==='like'?'👍':rating==='dislike'?'👎':''}</div>`;
+    card.onclick = ()=>openRecipe(m.id);
+    grid.appendChild(card);
+  });
+}
+
+function capitalize(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+
+// ── RECIPE OVERLAY ──
+let activeTimers = {};
+
+function openRecipe(id){
+  const m = (window.__MEALS__||[]).find(x=>x.id===id);
+  if(!m) return;
+  STATE.currentMeal = m;
+  STATE.serving = 1;
+  activeTimers = {};
+
+  document.getElementById('ro-emoji').textContent = m.emoji;
+  document.getElementById('ro-name').textContent = m.name;
+  document.getElementById('ro-name-ta').textContent = [m.nameTA, m.nameUR].filter(Boolean).join(' · ');
+  document.getElementById('ro-meta').innerHTML = `
+    <span class="badge badge-effort-${m.effort}">${capitalize(m.effort)}</span>
+    <span class="badge badge-time">⏱ ${m.time}min</span>
+    <span class="badge badge-protein">💪 ${m.protein}g protein</span>
+    <span class="badge badge-cal">🔥 ${m.calories}kcal</span>`;
+
+  document.querySelectorAll('.serving-btn').forEach(b=>b.classList.toggle('active',+b.dataset.s===1));
+  renderIngredients(m, 1);
+  renderSteps(m);
+
+  document.getElementById('ro-tip').textContent = m.tip || '';
+  const tipSec = document.getElementById('ro-tip-section');
+  tipSec.style.display = m.tip ? 'block' : 'none';
+
+  const npSec = document.getElementById('ro-nightprep-section');
+  if(m.nightPrep){ npSec.style.display='block'; document.getElementById('ro-nightprep').textContent=m.nightPrep; }
+  else npSec.style.display='none';
+
+  const rating = STATE.ratings[m.id];
+  document.getElementById('rate-like').className = 'rate-btn'+(rating==='like'?' selected-like':'');
+  document.getElementById('rate-dislike').className = 'rate-btn'+(rating==='dislike'?' selected-dislike':'');
+
+  const btn = document.getElementById('cook-it-btn');
+  btn.textContent = '✅ Mark as cooked';
+  btn.className = 'cook-it-btn';
+
+  const ytQ = encodeURIComponent((m.video||m.name)+' recipe');
+  const ytLink = document.getElementById('ro-video-link');
+  ytLink.href = 'https://www.youtube.com/results?search_query='+ytQ;
+
+  document.getElementById('recipe-overlay').classList.add('open');
+  document.getElementById('recipe-overlay').scrollTop = 0;
+}
+
+function closeRecipe(){
+  document.getElementById('recipe-overlay').classList.remove('open');
+  Object.values(activeTimers).forEach(t=>clearInterval(t.interval));
+  activeTimers = {};
+}
+
+function setServing(n){
+  STATE.serving = n;
+  document.querySelectorAll('.serving-btn').forEach(b=>b.classList.toggle('active',+b.dataset.s===n));
+  if(STATE.currentMeal) renderIngredients(STATE.currentMeal, n);
+}
+
+function renderIngredients(m, serving){
+  const list = document.getElementById('ro-ingredients');
+  list.innerHTML = '';
+  (m.ingredients||[]).forEach(ing=>{
+    const qty = ing.qty ? formatQty(ing.qty * serving)+' '+ing.unit : '';
+    const div = document.createElement('div');
+    div.className='ingredient-item';
+    div.innerHTML = `<span class="ing-emoji">${ing.emoji||'🥄'}</span>
+      <span class="ing-name">${ing.name}${ing.nameTA?'<br><span class="ing-name-ta">'+ing.nameTA+(ing.nameUR?' · '+ing.nameUR:'')+'</span>':''}</span>
+      <span class="ing-qty">${qty}</span>`;
+    list.appendChild(div);
+  });
+}
+
+function formatQty(n){
+  if(n===0.5) return '½';
+  if(n===0.25) return '¼';
+  if(n===0.75) return '¾';
+  if(n===1.5) return '1½';
+  if(Number.isInteger(n)) return ''+n;
+  return n.toFixed(1).replace(/\.0$/,'');
+}
+
+function renderSteps(m){
+  const list = document.getElementById('ro-steps');
+  list.innerHTML = '';
+  (m.steps||[]).forEach((step, i)=>{
+    const div = document.createElement('div');
+    div.className='step-item';
+    let timerHtml = '';
+    if(step.timer && step.timer>0){
+      timerHtml = `<button class="step-timer-btn" id="timer-btn-${i}" onclick="startTimer(${i},${step.timer})">
+        ⏱ <span class="step-timer-display" id="timer-display-${i}">${formatTimer(step.timer)}</span>
+      </button>`;
+    }
+    div.innerHTML = `<div class="step-num">${i+1}</div>
+      <div class="step-content">
+        <div class="step-text">${step.text}</div>
+        ${timerHtml}
+      </div>`;
+    list.appendChild(div);
+  });
+}
+
+function startTimer(stepIdx, seconds){
+  const btn = document.getElementById('timer-btn-'+stepIdx);
+  const display = document.getElementById('timer-display-'+stepIdx);
+  if(!btn || !display) return;
+
+  if(activeTimers[stepIdx]){
+    clearInterval(activeTimers[stepIdx].interval);
+    delete activeTimers[stepIdx];
+    btn.className='step-timer-btn';
+    display.textContent = formatTimer(seconds);
+    return;
+  }
+
+  let remaining = seconds;
+  btn.className='step-timer-btn running';
+  const interval = setInterval(()=>{
+    remaining--;
+    display.textContent = formatTimer(remaining);
+    if(remaining<=0){
+      clearInterval(interval);
+      delete activeTimers[stepIdx];
+      btn.className='step-timer-btn';
+      display.textContent = '✅ Done!';
+      if('vibrate' in navigator) navigator.vibrate([200,100,200]);
+    }
+  },1000);
+  activeTimers[stepIdx] = {interval, seconds};
+}
+
+function formatTimer(s){
+  const m=Math.floor(s/60), sec=s%60;
+  return (m>0?m+'m ':'')+sec+'s';
+}
+
+function rateRecipe(val){
+  if(!STATE.currentMeal) return;
+  const id = STATE.currentMeal.id;
+  const prev = STATE.ratings[id];
+  STATE.ratings[id] = prev===val ? null : val;
+  save('ratings', STATE.ratings);
+  const like = document.getElementById('rate-like');
+  const dis  = document.getElementById('rate-dislike');
+  like.className = 'rate-btn'+(STATE.ratings[id]==='like'?' selected-like':'');
+  dis.className  = 'rate-btn'+(STATE.ratings[id]==='dislike'?' selected-dislike':'');
+}
+
+function markCooked(){
+  if(!STATE.currentMeal) return;
+  const m = STATE.currentMeal;
+  const now = new Date();
+  const entry = {id:m.id, ts:now.toISOString(), emoji:m.emoji, name:m.name, protein:m.protein, calories:m.calories, type:m.type};
+  STATE.history.unshift(entry);
+  if(STATE.history.length>200) STATE.history.pop();
+  save('history', STATE.history);
+
+  STATE.todayLog[m.type] = m.id;
+  save('todayLog_'+todayKey(), STATE.todayLog);
+
+  const btn = document.getElementById('cook-it-btn');
+  btn.textContent = '🎉 Cooked!';
+  btn.className = 'cook-it-btn done';
+  renderProtein();
+  renderTimeline();
+}
+
+// ── FRIDGE ──
+const FRIDGE_CATS = [
+  { label:'Proteins', items: ['Eggs','Chicken','Paneer','Canned tuna','Dal (lentils)','Peanut butter'] },
+  { label:'Veggies & Fruits', items: ['Tomato','Onion','Potato','Carrot','Banana','Cucumber'] },
+  { label:'Dairy & Fats', items: ['Milk','Curd (yogurt)','Butter','Cheese slice'] },
+  { label:'Grains', items: ['Bread','Rice (cooked)','Oats','Wheat chapati'] },
+  { label:'Pantry', items: ['Sunflower oil','Salt','Pepper','Cumin','Coriander powder','Chilli powder','Garam masala','Sugar','Tea bags'] },
+];
+
+const FRIDGE_EMOJI = {'Eggs':'🥚','Chicken':'🍗','Paneer':'🧀','Canned tuna':'🐟','Dal (lentils)':'🫘','Peanut butter':'🥜',
+  'Tomato':'🍅','Onion':'🧅','Potato':'🥔','Carrot':'🥕','Banana':'🍌','Cucumber':'🥒',
+  'Milk':'🥛','Curd (yogurt)':'🫙','Butter':'🧈','Cheese slice':'🧀',
+  'Bread':'🍞','Rice (cooked)':'🍚','Oats':'🥣','Wheat chapati':'🫓',
+  'Sunflower oil':'🫙','Salt':'🧂','Pepper':'🌶️','Cumin':'🌰','Coriander powder':'🌿','Chilli powder':'🌶️','Garam masala':'✨','Sugar':'🍬','Tea bags':'🍵',
+};
+
+function renderFridge(){
+  const cont = document.getElementById('fridge-cats');
+  cont.innerHTML = '';
+  FRIDGE_CATS.forEach(cat=>{
+    const sec = document.createElement('div');
+    sec.className='card';
+    sec.innerHTML = `<div class="fridge-cat-title">${cat.label}</div><div class="fridge-grid" id="fg-${cat.label.replace(/\s/g,'')}"></div>`;
+    cont.appendChild(sec);
+    const grid = sec.querySelector('.fridge-grid');
+    cat.items.forEach(item=>{
+      const div = document.createElement('div');
+      div.className='fridge-item'+(STATE.fridge[item]?' checked':'');
+      div.innerHTML=`<div class="fridge-cb">${STATE.fridge[item]?'✓':''}</div>
+        <span class="fridge-emoji">${FRIDGE_EMOJI[item]||'🥄'}</span>
+        <span class="fridge-label">${item}</span>`;
+      div.onclick=()=>{
+        STATE.fridge[item]=!STATE.fridge[item];
+        save('fridge', STATE.fridge);
+        div.classList.toggle('checked', !!STATE.fridge[item]);
+        div.querySelector('.fridge-cb').textContent = STATE.fridge[item]?'✓':'';
+      };
+      grid.appendChild(div);
+    });
+  });
+  document.getElementById('fridge-results').innerHTML='';
+}
+
+function suggestFromFridge(){
+  const have = Object.entries(STATE.fridge).filter(([,v])=>v).map(([k])=>k.toLowerCase());
+  const meals = (window.__MEALS__||[]);
+  const scored = meals.map(m=>{
+    const names = (m.ingredients||[]).map(i=>i.name.toLowerCase());
+    const matched = names.filter(n=>have.some(h=>n.includes(h)||h.includes(n)));
+    return {m, score: names.length ? matched.length/names.length : 0, matched: matched.length, total: names.length};
+  }).filter(x=>x.score>0).sort((a,b)=>b.score-a.score).slice(0,6);
+
+  const res = document.getElementById('fridge-results');
+  if(!scored.length){
+    res.innerHTML='<div class="empty-state"><div class="empty-icon">🧊</div>Tick some ingredients above to see suggestions!</div>';
+    return;
+  }
+  res.innerHTML='<div class="card-title" style="margin-bottom:8px">🍳 You can make these:</div>';
+  scored.forEach(({m, matched, total})=>{
+    const div = document.createElement('div');
+    div.className='meal-card';
+    div.style.marginBottom='8px';
+    div.innerHTML=`<div class="meal-card-emoji">${m.emoji}</div>
+      <div class="meal-card-info">
+        <div class="meal-card-name">${m.name}</div>
+        <div class="meal-card-sub">${matched}/${total} ingredients on hand</div>
+        <div class="meal-card-badges">
+          <span class="badge badge-effort-${m.effort}">${capitalize(m.effort)}</span>
+          <span class="badge badge-time">⏱ ${m.time}min</span>
+        </div>
+      </div>`;
+    div.onclick=()=>openRecipe(m.id);
+    res.appendChild(div);
+  });
+}
+
+// ── PLANNER ──
+const WEEK_SLOTS = ['breakfast','lunch','snack','dinner'];
+const SLOT_LABEL = {breakfast:'Breakfast',lunch:'Lunch',snack:'Snack',dinner:'Dinner'};
+
+function getWeekDays(){
+  const days=[];
+  const today=new Date();
+  for(let i=0;i<7;i++){
+    const d=new Date(today);
+    d.setDate(today.getDate()+i);
+    days.push(d);
+  }
+  return days;
+}
+
+function dayKey(d){
+  return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+}
+
+function renderPlanner(){
+  const grid = document.getElementById('week-grid');
+  grid.innerHTML='';
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  getWeekDays().forEach(d=>{
+    const dk = dayKey(d);
+    const card = document.createElement('div');
+    card.className='day-card';
+    const isToday = dk===todayKey();
+    card.innerHTML=`<div class="day-header">
+      <div class="day-name">${days[d.getDay()]}${isToday?' (Today)':''}</div>
+      <div class="day-date">${d.getDate()}/${d.getMonth()+1}</div>
+    </div><div class="day-meals" id="dm-${dk}"></div>`;
+    grid.appendChild(card);
+    const mealsDiv = card.querySelector('.day-meals');
+    WEEK_SLOTS.forEach(slot=>{
+      const planId = STATE.plan[dk] && STATE.plan[dk][slot];
+      const meal = planId ? (window.__MEALS__||[]).find(m=>m.id===planId) : null;
+      const row = document.createElement('div');
+      row.className='day-slot';
+      row.innerHTML=`<span class="day-slot-label">${SLOT_LABEL[slot]}</span>
+        <span class="day-slot-meal${meal?'':' empty'}" id="slot-${dk}-${slot}">
+          ${meal?(meal.emoji+' '+truncate(meal.name,20)):'Tap to add'}
+        </span>`;
+      row.querySelector('.day-slot-meal').onclick=()=>openMealPicker(dk, slot);
+      mealsDiv.appendChild(row);
+    });
+  });
+}
+
+function truncate(str, n){ return str.length>n?str.slice(0,n-1)+'…':str; }
+
+function openMealPicker(dk, slot){
+  STATE.pickerTarget = {dk, slot};
+  const title = document.getElementById('picker-title');
+  title.textContent = 'Pick '+SLOT_LABEL[slot];
+  const list = document.getElementById('picker-list');
+  list.innerHTML='';
+  const meals = (window.__MEALS__||[]).filter(m=>m.type===slot);
+  meals.forEach(m=>{
+    const div=document.createElement('div');
+    div.className='meal-picker-item';
+    div.innerHTML=`<div class="meal-picker-emoji">${m.emoji}</div>
+      <div class="meal-picker-info">
+        <div class="meal-picker-name">${m.name}</div>
+        <div class="meal-picker-meta">⏱ ${m.time}min · 💪 ${m.protein}g · 🔥 ${m.calories}kcal</div>
+      </div>`;
+    div.onclick=()=>assignMeal(m.id);
+    list.appendChild(div);
+  });
+  // Clear option
+  const clr=document.createElement('div');
+  clr.className='meal-picker-item';
+  clr.innerHTML='<div class="meal-picker-emoji">🗑️</div><div class="meal-picker-info"><div class="meal-picker-name">Clear slot</div></div>';
+  clr.onclick=()=>assignMeal(null);
+  list.appendChild(clr);
+
+  document.getElementById('meal-picker-overlay').classList.add('open');
+}
+
+function assignMeal(id){
+  const {dk, slot} = STATE.pickerTarget;
+  if(!STATE.plan[dk]) STATE.plan[dk]={};
+  if(id) STATE.plan[dk][slot]=id;
+  else delete STATE.plan[dk][slot];
+  save('plan', STATE.plan);
+  closeMealPicker();
+  renderPlanner();
+}
+
+function closeMealPicker(){
+  document.getElementById('meal-picker-overlay').classList.remove('open');
+}
+
+function generateShoppingFromPlan(){
+  // Collect all meals in plan this week
+  const mealIds = new Set();
+  Object.values(STATE.plan).forEach(day=>{
+    Object.values(day).forEach(id=>{ if(id) mealIds.add(id); });
+  });
+  if(!mealIds.size){
+    alert('Add some meals to your planner first!');
+    return;
+  }
+  buildShoppingList([...mealIds]);
+  showSection('home'); // go to a temp view — will open shopping via custom section
+  openShoppingSection([...mealIds]);
+}
+
+// ── SHOPPING LIST ──
+let _shopMealIds = [];
+
+function openShoppingSection(mealIds){
+  _shopMealIds = mealIds || [];
+  showShoppingOverlay();
+}
+
+function showShoppingOverlay(){
+  // Build inline in history section temporarily — using a modal approach
+  const overlay = document.getElementById('recipe-overlay');
+  const sheet = document.getElementById('recipe-sheet');
+
+  // Build shopping list HTML
+  const agg = {};
+  _shopMealIds.forEach(id=>{
+    const m = (window.__MEALS__||[]).find(x=>x.id===id);
+    if(!m) return;
+    (m.ingredients||[]).forEach(ing=>{
+      const key = ing.name;
+      if(!agg[key]) agg[key]={emoji:ing.emoji,name:ing.name,unit:ing.unit,qty:0,cat:getCat(ing.name)};
+      agg[key].qty += (ing.qty||0) * 1;
+    });
+  });
+
+  const cats = {};
+  Object.values(agg).forEach(item=>{
+    if(!cats[item.cat]) cats[item.cat]=[];
+    cats[item.cat].push(item);
+  });
+
+  let html=`<div class="recipe-header" style="padding-bottom:16px">
+    <button class="recipe-close" onclick="document.getElementById('recipe-overlay').classList.remove('open')">✕</button>
+    <div style="font-size:28px;margin-bottom:8px">🛒</div>
+    <div class="recipe-title">Shopping List</div>
+    <div class="recipe-title-ta">${_shopMealIds.length} meals · ${Object.keys(agg).length} items</div>
+  </div><div style="padding:0 16px">`;
+  Object.entries(cats).forEach(([cat,items])=>{
+    html+=`<div class="shopping-section-title">${cat}</div>`;
+    items.forEach(item=>{
+      html+=`<div class="shopping-item" onclick="this.classList.toggle('got');this.querySelector('.si-cb').textContent=this.classList.contains('got')?'✓':''">
+        <div class="si-cb"></div>
+        <span class="si-emoji">${item.emoji||'🥄'}</span>
+        <span class="si-name">${item.name}</span>
+        <span class="si-qty">${formatQty(item.qty)} ${item.unit}</span>
+      </div>`;
+    });
+  });
+  html+=`<button class="whatsapp-btn" onclick="shareWhatsApp()">
+    <span>📱</span> Share on WhatsApp
+  </button></div>`;
+
+  sheet.innerHTML = html;
+  overlay.classList.add('open');
+  overlay.scrollTop=0;
+  window._currentShopAgg = agg;
+}
+
+function getCat(name){
+  const n=name.toLowerCase();
+  if(['egg','chicken','paneer','tuna','prawn','tofu','dal','lentil','peanut','chana'].some(k=>n.includes(k))) return '🥩 Proteins';
+  if(['tomato','onion','potato','carrot','cucumber','spinach','coriander','mint','ginger','garlic','capsicum','bean','peas','cauliflower','cabbage'].some(k=>n.includes(k))) return '🥦 Veggies';
+  if(['banana','apple','lemon','mango','orange'].some(k=>n.includes(k))) return '🍌 Fruits';
+  if(['milk','curd','yogurt','butter','cheese','cream'].some(k=>n.includes(k))) return '🥛 Dairy';
+  if(['rice','bread','chapati','oats','roti','maida','wheat','rava','semolina','pasta','noodle'].some(k=>n.includes(k))) return '🌾 Grains';
+  if(['oil','salt','pepper','cumin','coriander powder','chilli','garam masala','sugar','tea','turmeric','cardamom','cinnamon','mustard','curry'].some(k=>n.includes(k))) return '🧂 Spices & Pantry';
+  return '🛍️ Other';
+}
+
+function shareWhatsApp(){
+  const agg = window._currentShopAgg || {};
+  let txt = '🛒 *Shopping List*\n\n';
+  const cats = {};
+  Object.values(agg).forEach(item=>{
+    if(!cats[item.cat]) cats[item.cat]=[];
+    cats[item.cat].push(item);
+  });
+  Object.entries(cats).forEach(([cat,items])=>{
+    txt += `*${cat}*\n`;
+    items.forEach(i=>{ txt+=`• ${i.emoji||''} ${i.name} — ${formatQty(i.qty)} ${i.unit}\n`; });
+    txt+='\n';
+  });
+  txt += '_From Bachelor Meal Planning app_';
+  const url = 'https://wa.me/?text='+encodeURIComponent(txt);
+  window.open(url, '_blank');
+}
+
+// ── HISTORY ──
+function renderHistory(filter){
+  ['hist-all-btn','hist-fav-btn','hist-dis-btn'].forEach(id=>{
+    document.getElementById(id).classList.remove('active');
+  });
+  document.getElementById('hist-all-btn').classList.toggle('active', filter==='all');
+  document.getElementById('hist-fav-btn').classList.toggle('active', filter==='fav');
+  document.getElementById('hist-dis-btn').classList.toggle('active', filter==='dis');
+
+  const list = document.getElementById('history-list');
+  let items = STATE.history;
+  if(filter==='fav') items = items.filter(e=>STATE.ratings[e.id]==='like');
+  if(filter==='dis') items = items.filter(e=>STATE.ratings[e.id]==='dislike');
+  list.innerHTML='';
+  if(!items.length){
+    list.innerHTML='<div class="history-empty"><div>🍽️</div>No meals logged yet.<br>Cook something and mark it done!</div>';
+    return;
+  }
+  items.slice(0,50).forEach(e=>{
+    const rating=STATE.ratings[e.id];
+    const div=document.createElement('div');
+    div.className='history-item';
+    div.innerHTML=`<div class="history-emoji">${e.emoji}</div>
+      <div class="history-info">
+        <div class="history-name">${e.name}</div>
+        <div class="history-meta">${formatDate(e.ts)} · 💪 ${e.protein}g · 🔥 ${e.calories}kcal</div>
+      </div>
+      <div class="history-rating">${rating==='like'?'👍':rating==='dislike'?'👎':''}</div>`;
+    div.onclick=()=>openRecipe(e.id);
+    list.appendChild(div);
+  });
+}
+
+function showHistory(filter){ renderHistory(filter); }
+
+function formatDate(iso){
+  const d=new Date(iso);
+  const today=new Date();
+  const yesterday=new Date(today); yesterday.setDate(today.getDate()-1);
+  if(dayKey(d)===dayKey(today)) return 'Today '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  if(dayKey(d)===dayKey(yesterday)) return 'Yesterday';
+  return d.toLocaleDateString([],{day:'numeric',month:'short'});
+}
+
+function clearHistory(){
+  if(!confirm('Clear all history?')) return;
+  STATE.history=[];
+  STATE.todayLog={};
+  save('history',[]);
+  save('todayLog_'+todayKey(),{});
+  renderHistory('all');
+  renderHome();
+}
+
+// ── SURPRISE ──
+function showSurprise(){
+  const meals = window.__MEALS__||[];
+  const m = meals[Math.floor(Math.random()*meals.length)];
+  openRecipe(m.id);
+}
+
+// ── PANTRY ── (accessible from nav via history section alternate view — using overlay)
+function openPantry(){
+  const overlay = document.getElementById('recipe-overlay');
+  const sheet = document.getElementById('recipe-sheet');
+  const pantry = window.__PANTRY__||[];
+  let html=`<div class="recipe-header" style="padding-bottom:16px">
+    <button class="recipe-close" onclick="document.getElementById('recipe-overlay').classList.remove('open')">✕</button>
+    <div style="font-size:28px;margin-bottom:8px">🏪</div>
+    <div class="recipe-title">Monthly Pantry Guide</div>
+    <div class="recipe-title-ta">Chennai market prices · ${pantry.length} items</div>
+  </div><div style="padding:0 16px 20px">
+    <div class="pantry-intro" style="margin-bottom:14px">Stock these basics and you can cook anything in the app.</div>
+    <div class="pantry-grid">`;
+  pantry.forEach(p=>{
+    const isWeekly = !!(p.weekly && p.weekly !== 'use as needed');
+    html+=`<div class="pantry-row">
+      <div class="pantry-emoji">${p.emoji}</div>
+      <div class="pantry-info">
+        <div class="pantry-name">${p.name}${p.nameTA?'<br><span style="font-size:11px;color:var(--text3)">'+p.nameTA+'</span>':''}</div>
+        <div class="pantry-detail">${p.monthly||p.weekly||''} · <span class="pantry-freq ${isWeekly?'weekly':''}">${isWeekly?'buy weekly':'buy monthly'}</span></div>
+      </div>
+      <div>
+        <div class="pantry-price">${p.price}</div>
+      </div>
+    </div>`;
+  });
+  html+=`</div></div>`;
+  sheet.innerHTML=html;
+  overlay.classList.add('open');
+  overlay.scrollTop=0;
+}
+
+// ── INIT ──
+function init(){
+  loadState();
+  applyTheme(STATE.theme);
+  renderHome();
+  renderMealGrid();
+
+  // Add pantry button to history section
+  const histSec = document.getElementById('sec-history');
+  const pantryBtn = document.createElement('button');
+  pantryBtn.className='clear-history-btn';
+  pantryBtn.textContent='🏪 Monthly Pantry Guide';
+  pantryBtn.style.marginTop='8px';
+  pantryBtn.onclick=openPantry;
+  histSec.appendChild(pantryBtn);
+
+  // Add shopping list button to home
+  const homeBtn = document.createElement('button');
+  homeBtn.className='fridge-suggest-btn';
+  homeBtn.style.cssText='margin-top:0;background:var(--olive);margin-bottom:0';
+  homeBtn.textContent='🛒 Shopping List from Planner';
+  homeBtn.onclick=()=>{
+    const mealIds = new Set();
+    Object.values(STATE.plan).forEach(day=>{
+      Object.values(day).forEach(id=>{ if(id) mealIds.add(id); });
+    });
+    if(!mealIds.size){
+      alert('Add meals to your weekly planner first, then generate a shopping list!');
+      showSection('plan');
+      return;
+    }
+    openShoppingSection([...mealIds]);
+  };
+  document.getElementById('sec-home').appendChild(homeBtn);
+
+  // Close overlay on backdrop click
+  document.getElementById('recipe-overlay').addEventListener('click', function(e){
+    if(e.target===this) closeRecipe();
+  });
+  document.getElementById('meal-picker-overlay').addEventListener('click', function(e){
+    if(e.target===this) closeMealPicker();
+  });
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
