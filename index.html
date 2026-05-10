@@ -496,9 +496,8 @@ body{display:flex;flex-direction:column;max-width:480px;margin:0 auto;min-height
 .cook-ingredients-body span[style*="color:var(--accent)"]{color:#FFA07A!important}
 
 /* ── 7. FROSTED GLASS RECIPE SHEET ── */
-#recipe-overlay{backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}
-.recipe-sheet{background:rgba(255,251,245,.94);backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px);box-shadow:0 -8px 48px rgba(0,0,0,.18)}
-[data-theme="dark"] .recipe-sheet{background:rgba(26,20,15,.94)}
+#recipe-overlay.open{backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.recipe-sheet{background:var(--card);box-shadow:0 -8px 48px rgba(0,0,0,.18)}
 
 /* ── 8. GRADIENT CTAs ── */
 .fridge-suggest-btn{background:linear-gradient(135deg,#E86C3A 0%,#C9920D 100%);transition:filter .2s}
