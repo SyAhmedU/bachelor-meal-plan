@@ -1056,18 +1056,19 @@ function markCooked(){
 
 // ── FRIDGE ──
 const FRIDGE_CATS = [
-  { label:'Proteins', items: ['Eggs','Chicken','Paneer','Canned tuna','Dal (lentils)','Peanut butter'] },
-  { label:'Veggies & Fruits', items: ['Tomato','Onion','Potato','Carrot','Banana','Cucumber'] },
-  { label:'Dairy & Fats', items: ['Milk','Curd (yogurt)','Butter','Cheese slice'] },
-  { label:'Grains', items: ['Bread','Rice (cooked)','Oats','Wheat chapati'] },
-  { label:'Pantry', items: ['Sunflower oil','Salt','Pepper','Cumin','Coriander powder','Chilli powder','Garam masala','Sugar','Tea bags'] },
+  { label:'Proteins', items: ['Eggs','Chicken','Paneer','Fish','Toor dal','Moong dal','Masoor dal','Chana dal','Chickpeas','Peanut butter'] },
+  { label:'Veggies & Fruits', items: ['Onion','Tomato','Potato','Green chilli','Cauliflower','Bottle gourd','Brinjal','Green peas','Banana','Lemon juice','Coriander leaves','Curry leaves','Mint leaves'] },
+  { label:'Dairy & Fats', items: ['Milk','Curd','Butter','Fresh coconut','Coconut milk'] },
+  { label:'Grains & Bread', items: ['Bread slices','Rice','Wheat atta','Poha','Oats','Besan','Dosa batter','Semiya','Roti'] },
+  { label:'Pantry & Spices', items: ['Sunflower oil','Salt','Turmeric','Red chilli powder','Coriander powder','Garam masala','Cumin seeds','Mustard seeds','Ginger-garlic paste','Sambar powder','Chicken masala','Biryani masala','Tamarind paste','Ketchup','Soy sauce','Tea leaves','Sugar','Chaat masala','Cashews'] },
 ];
 
-const FRIDGE_EMOJI = {'Eggs':'🥚','Chicken':'🍗','Paneer':'🧀','Canned tuna':'🐟','Dal (lentils)':'🫘','Peanut butter':'🥜',
-  'Tomato':'🍅','Onion':'🧅','Potato':'🥔','Carrot':'🥕','Banana':'🍌','Cucumber':'🥒',
-  'Milk':'🥛','Curd (yogurt)':'🫙','Butter':'🧈','Cheese slice':'🧀',
-  'Bread':'🍞','Rice (cooked)':'🍚','Oats':'🥣','Wheat chapati':'🫓',
-  'Sunflower oil':'🫙','Salt':'🧂','Pepper':'🌶️','Cumin':'🌰','Coriander powder':'🌿','Chilli powder':'🌶️','Garam masala':'✨','Sugar':'🍬','Tea bags':'🍵',
+const FRIDGE_EMOJI = {
+  'Eggs':'🥚','Chicken':'🍗','Paneer':'🧀','Fish':'🐟','Toor dal':'🫘','Moong dal':'🫘','Masoor dal':'🫘','Chana dal':'🫘','Chickpeas':'🫘','Peanut butter':'🥜',
+  'Onion':'🧅','Tomato':'🍅','Potato':'🥔','Green chilli':'🌶️','Cauliflower':'🥦','Bottle gourd':'🥒','Brinjal':'🍆','Green peas':'🫘','Banana':'🍌','Lemon juice':'🍋','Coriander leaves':'🌿','Curry leaves':'🌿','Mint leaves':'🌿',
+  'Milk':'🥛','Curd':'🫙','Butter':'🧈','Fresh coconut':'🥥','Coconut milk':'🥥',
+  'Bread slices':'🍞','Rice':'🍚','Wheat atta':'🌾','Poha':'🌾','Oats':'🥣','Besan':'🌾','Dosa batter':'🫙','Semiya':'🍜','Roti':'🫓',
+  'Sunflower oil':'🫚','Salt':'🧂','Turmeric':'🫙','Red chilli powder':'🌶️','Coriander powder':'🫙','Garam masala':'✨','Cumin seeds':'🌰','Mustard seeds':'🌰','Ginger-garlic paste':'🫙','Sambar powder':'🫙','Chicken masala':'🫙','Biryani masala':'🫙','Tamarind paste':'🫙','Ketchup':'🫙','Soy sauce':'🫙','Tea leaves':'🍵','Sugar':'🍬','Chaat masala':'🫙','Cashews':'🥜',
 };
 
 function renderFridge(){
