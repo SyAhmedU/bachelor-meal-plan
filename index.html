@@ -145,6 +145,15 @@ body{display:flex;flex-direction:column;max-width:480px;margin:0 auto;min-height
 .tonight-list li{font-size:13px;color:var(--text2);padding:5px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:8px}
 .tonight-list li:last-child{border:none}
 .tonight-list li::before{content:'🌙';flex-shrink:0}
+.prep-item{cursor:pointer;transition:opacity .2s;user-select:none}
+.prep-item.done{opacity:.42}
+.prep-item.done .prep-text{text-decoration:line-through;color:var(--text3)}
+.prep-body{flex:1}
+.prep-label{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px}
+.prep-text{font-size:13px;color:var(--text2);line-height:1.45}
+.prep-empty{color:var(--text3)!important;font-style:italic}
+.prep-empty::before{content:''!important}
+.prep-plan-link{color:var(--accent);cursor:pointer;text-decoration:underline}
 
 /* ── MEAL BROWSER ── */
 .tab-row{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
@@ -636,6 +645,7 @@ let STATE = {
   plan: {},
   fridge: {},
   todayLog: {},
+  nightPrepDone: {},
   theme: 'light',
   proteinGoal: 150,
   pickerTarget: null,
@@ -650,12 +660,14 @@ function loadState(){
   STATE.ratings = load('ratings', {});
   STATE.plan    = load('plan', {});
   STATE.fridge  = load('fridge', {});
-  STATE.todayLog= load('todayLog_'+todayKey(), {});
-  STATE.theme   = load('theme', 'light');
-  STATE.proteinGoal = load('proteinGoal', 150);
+  STATE.todayLog      = load('todayLog_'+todayKey(), {});
+  STATE.nightPrepDone = load('prepDone_'+tomorrowKey(), {});
+  STATE.theme         = load('theme', 'light');
+  STATE.proteinGoal   = load('proteinGoal', 150);
 }
 
 function todayKey(){ const d=new Date(); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
+function tomorrowKey(){ const d=new Date(); d.setDate(d.getDate()+1); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
 
 // ── THEME ──
 function applyTheme(t){
@@ -819,19 +831,42 @@ function renderProtein(){
 
 function renderTonightPrep(){
   const list = document.getElementById('tonight-list');
-  const preps = (window.__MEALS__||[])
-    .filter(m=>m.nightPrep && m.type==='breakfast')
-    .slice(0,3);
   list.innerHTML = '';
-  if(!preps.length){
-    list.innerHTML = '<li style="border:none">No prep needed — you\'re good!</li>';
+  const tk = tomorrowKey();
+  const tomorrowPlan = STATE.plan[tk] || {};
+  const meals = window.__MEALS__ || [];
+
+  if(!Object.keys(tomorrowPlan).length){
+    list.innerHTML = '<li class="prep-empty">No meals planned for tomorrow. <span class="prep-plan-link" onclick="showSection(\'plan\')">Open Planner →</span></li>';
     return;
   }
-  preps.forEach(m=>{
+
+  const preps = Object.values(tomorrowPlan)
+    .map(id => meals.find(m => m.id === id))
+    .filter(m => m && m.nightPrep);
+
+  if(!preps.length){
+    list.innerHTML = '<li class="prep-empty">Nothing to prep — you\'re all set for tomorrow! 🎉</li>';
+    return;
+  }
+
+  preps.forEach(m => {
+    const done = !!STATE.nightPrepDone[m.id];
     const li = document.createElement('li');
-    li.innerHTML = `<strong>${m.name}:</strong> ${m.nightPrep}`;
+    li.className = 'prep-item' + (done ? ' done' : '');
+    li.innerHTML = `<div class="prep-body">
+      <div class="prep-label">${m.emoji} ${m.name}</div>
+      <div class="prep-text">${m.nightPrep}</div>
+    </div>`;
+    li.onclick = () => togglePrepDone(m.id);
     list.appendChild(li);
   });
+}
+
+function togglePrepDone(id){
+  STATE.nightPrepDone[id] = !STATE.nightPrepDone[id];
+  save('prepDone_'+tomorrowKey(), STATE.nightPrepDone);
+  renderTonightPrep();
 }
 
 // ── MEAL BROWSER ──
