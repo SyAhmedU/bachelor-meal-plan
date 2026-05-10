@@ -360,6 +360,7 @@ body{display:flex;flex-direction:column;max-width:480px;margin:0 auto;min-height
 .shopping-item .si-qty{font-size:13px;font-weight:700;color:var(--accent);white-space:nowrap}
 .whatsapp-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:16px;background:#25D366;color:#fff;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:700;cursor:pointer}
 .whatsapp-btn:hover{background:#1DA851}
+.jiomart-btn:hover{background:#0055AA}
 
 /* ── TODAY'S SHOPPING LIST ── */
 .today-shop-divider{display:flex;align-items:center;gap:10px;margin:22px 0 14px;color:var(--text2);font-size:14px;font-weight:700}
@@ -1739,6 +1740,13 @@ function buildTodayShopList(){
   waBtn.innerHTML = '<span>📱</span> Share on WhatsApp';
   waBtn.onclick = shareTodayListWA;
   container.appendChild(waBtn);
+
+  const jmBtn = document.createElement('button');
+  jmBtn.className = 'whatsapp-btn';
+  jmBtn.style.cssText = 'margin-top:8px;background:#0066CC';
+  jmBtn.innerHTML = '<span>🛍️</span> Order on JioMart';
+  jmBtn.onclick = orderJioMart;
+  container.appendChild(jmBtn);
 }
 
 function todayToggleItem(key, row, cb){
@@ -1776,6 +1784,16 @@ function shareTodayListWA(){
   });
   txt += '_From Bachelor Meal Planning app_';
   window.open('https://wa.me/?text='+encodeURIComponent(txt), '_blank');
+}
+
+function orderJioMart(){
+  const items = Object.values(_todayShopAgg).filter(i=>!_todayChecked[i.name.toLowerCase()+'|'+i.unit]);
+  if(!items.length){ alert('Nothing left to order — all items are ticked off!'); return; }
+  let txt = 'Hi, I want to order the following groceries:\n\n';
+  items.forEach(i=>{ txt += '• '+i.name+' — '+formatQty(i.qty)+' '+i.unit+'\n'; });
+  txt += '\nPlease confirm availability and delivery time. Thank you!';
+  // JioMart WhatsApp ordering number
+  window.open('https://wa.me/918850008000?text='+encodeURIComponent(txt), '_blank');
 }
 
 // ── SHOPPING LIST ──
