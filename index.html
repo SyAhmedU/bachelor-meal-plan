@@ -1595,6 +1595,8 @@ const _NAME_SUBS = {
   'fresh coconut':'Coconut', 'grated coconut':'Coconut',
   'curd / yoghurt':'Curd', 'curd / yogurt':'Curd', 'curd (plain yogurt)':'Curd',
   'sunflower oil':'Sunflower oil',
+  'tomatoes':'Tomato',
+  'onions':'Onion', 'small onion':'Onion', 'shallots':'Onion', 'pearl onion':'Onion',
 };
 const _SKIP_ING = ['water','cooked rice','leftover','ready-made','store-bought'];
 
@@ -1613,6 +1615,13 @@ function normalizeShopIng(ing){
   // Canonical name substitutions (match after stripping)
   const sub = _NAME_SUBS[name.toLowerCase()];
   if(sub) name = sub;
+
+  // Normalize oil tsp/tbsp → ml so all oil entries consolidate under one unit
+  const nameL0 = name.toLowerCase();
+  if(nameL0.includes('oil') && (unit==='tsp'||unit==='tbsp')){
+    qty = unit==='tsp' ? qty*5 : qty*15;
+    unit = 'ml';
+  }
 
   // Convert countable items to pieces (nos)
   const nameL = name.toLowerCase();
@@ -1650,6 +1659,9 @@ function buildTodayShopList(){
       agg[key].qty += norm.qty * serving;
     });
   });
+
+  // Ceil countable quantities — can't buy 2.5 onions
+  Object.values(agg).forEach(item=>{ if(item.unit==='nos') item.qty = Math.ceil(item.qty); });
 
   const container = document.getElementById('today-shop-list');
   if(!Object.keys(agg).length){
