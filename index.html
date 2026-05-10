@@ -1479,6 +1479,67 @@ function setTodayServing(slot, delta){
   renderTodaySlots();
 }
 
+// ── INGREDIENT NORMALISATION (for shopping lists) ──
+const _PIECE_WEIGHT = {
+  onion:100, tomato:80, potato:150, lemon:60,
+  brinjal:150, cauliflower:500, banana:100, egg:55, 'green chilli':10,
+};
+const _NAME_SUBS = {
+  'lemon juice':'Lemon', 'lime juice':'Lemon',
+  'green chili':'Green chilli',
+  'boneless chicken':'Chicken', 'chicken breast':'Chicken',
+  'chicken pieces':'Chicken', 'chicken mince':'Chicken keema',
+  'minced chicken':'Chicken keema',
+  'beef boneless':'Beef', 'minced beef':'Beef keema',
+  'mutton chops':'Mutton', 'mutton mince':'Mutton keema',
+  'minced mutton':'Mutton keema',
+  'whole wheat atta':'Wheat atta', 'aashirvaad atta':'Wheat atta', 'atta':'Wheat atta',
+  'sona masoori rice':'Rice', 'raw rice':'Rice',
+  'turmeric powder':'Turmeric',
+  'red chili powder':'Red chilli powder',
+  'fresh coriander':'Coriander leaves',
+  'fresh coconut':'Coconut', 'grated coconut':'Coconut',
+  'curd / yoghurt':'Curd', 'curd / yogurt':'Curd', 'curd (plain yogurt)':'Curd',
+  'sunflower oil':'Sunflower oil',
+};
+const _SKIP_ING = ['water','cooked rice','leftover','ready-made','store-bought'];
+
+function normalizeShopIng(ing){
+  let name = ing.name || '';
+  let unit = ing.unit || '';
+  let qty  = ing.qty  || 0;
+  const lraw = name.toLowerCase();
+  if(_SKIP_ING.some(s=>lraw.includes(s))) return null;
+
+  // Strip prep descriptors: "Onion (finely chopped)" → "Onion"
+  name = name.replace(/\s*\([^)]*\)/g,'').trim();
+  // Take first part of slash alternatives: "Bottle gourd / Sorakkai" → "Bottle gourd"
+  if(name.includes(' / ')) name = name.split(' / ')[0].trim();
+
+  // Canonical name substitutions (match after stripping)
+  const sub = _NAME_SUBS[name.toLowerCase()];
+  if(sub) name = sub;
+
+  // Convert countable items to pieces (nos)
+  const nameL = name.toLowerCase();
+  const pieceKey = Object.keys(_PIECE_WEIGHT).find(k => nameL === k || nameL.startsWith(k+' '));
+  if(pieceKey){
+    if(unit === 'g'){
+      qty = Math.ceil(qty / _PIECE_WEIGHT[pieceKey]);
+      unit = 'nos';
+    } else if(['medium','large','small','piece','pc'].includes(unit)){
+      unit = 'nos';
+    } else if(name === 'Lemon' && (unit==='tbsp'||unit==='tsp')){
+      qty = Math.max(1, Math.ceil(qty / (unit==='tbsp'?2:6)));
+      unit = 'nos';
+    }
+  }
+
+  return {emoji:ing.emoji, name, unit, qty};
+}
+
+function aggKey(norm){ return norm.name.toLowerCase()+'|'+norm.unit; }
+
 function buildTodayShopList(){
   const agg = {};
   TODAY_SLOT_CFG.forEach(({slot})=>{
@@ -1488,9 +1549,11 @@ function buildTodayShopList(){
     if(!meal) return;
     const serving = TODAY_SHOP.servings[slot];
     (meal.ingredients||[]).forEach(ing=>{
-      const key = ing.name.toLowerCase().trim()+'|'+ing.unit;
-      if(!agg[key]) agg[key]={emoji:ing.emoji, name:ing.name, unit:ing.unit, qty:0, cat:getCat(ing.name)};
-      agg[key].qty += (ing.qty||0)*serving;
+      const norm = normalizeShopIng(ing);
+      if(!norm) return;
+      const key = aggKey(norm);
+      if(!agg[key]) agg[key]={emoji:norm.emoji, name:norm.name, unit:norm.unit, qty:0, cat:getCat(norm.name)};
+      agg[key].qty += norm.qty * serving;
     });
   });
 
@@ -1628,9 +1691,11 @@ function showShoppingOverlay(){
     const m = (window.__MEALS__||[]).find(x=>x.id===id);
     if(!m) return;
     (m.ingredients||[]).forEach(ing=>{
-      const key = ing.name;
-      if(!agg[key]) agg[key]={emoji:ing.emoji,name:ing.name,unit:ing.unit,qty:0,cat:getCat(ing.name)};
-      agg[key].qty += (ing.qty||0) * 1;
+      const norm = normalizeShopIng(ing);
+      if(!norm) return;
+      const key = aggKey(norm);
+      if(!agg[key]) agg[key]={emoji:norm.emoji,name:norm.name,unit:norm.unit,qty:0,cat:getCat(norm.name)};
+      agg[key].qty += norm.qty;
     });
   });
 
