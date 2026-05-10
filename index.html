@@ -53,7 +53,6 @@
   --type-dinner: #E86050;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-button{position:relative;overflow:hidden}
 html,body{height:100%;font-family:'Plus Jakarta Sans','Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.5}
 body{display:flex;flex-direction:column;max-width:480px;margin:0 auto;min-height:100dvh;position:relative}
 
@@ -444,12 +443,12 @@ body{display:flex;flex-direction:column;max-width:480px;margin:0 auto;min-height
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 
 /* ── 1. SECTION FADE-IN ── */
-@keyframes sectionFadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-.section.active{animation:sectionFadeIn .28s cubic-bezier(.32,.72,0,1) both}
+@keyframes sectionFadeIn{from{opacity:0}to{opacity:1}}
+.section.active{animation:sectionFadeIn .22s ease forwards}
 
 /* ── 2. STAGGERED CARD ENTRANCE ── */
-@keyframes cardPop{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
-.meal-card{animation:cardPop .32s cubic-bezier(.32,.72,0,1) both}
+@keyframes cardPop{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.meal-card{animation:cardPop .28s ease forwards}
 
 /* ── 3. TAP RIPPLE ── */
 .ripple-host{position:relative;overflow:hidden}
@@ -495,9 +494,8 @@ body{display:flex;flex-direction:column;max-width:480px;margin:0 auto;min-height
 .cook-ingredients-body span[style*="color:var(--text)"]{color:#F0EDE8!important}
 .cook-ingredients-body span[style*="color:var(--accent)"]{color:#FFA07A!important}
 
-/* ── 7. FROSTED GLASS RECIPE SHEET ── */
-#recipe-overlay.open{backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
-.recipe-sheet{background:var(--card);box-shadow:0 -8px 48px rgba(0,0,0,.18)}
+/* ── 7. RECIPE SHEET SHADOW ── */
+.recipe-sheet{box-shadow:0 -8px 48px rgba(0,0,0,.18)}
 
 /* ── 8. GRADIENT CTAs ── */
 .fridge-suggest-btn{background:linear-gradient(135deg,#E86C3A 0%,#C9920D 100%);transition:filter .2s}
