@@ -361,6 +361,31 @@ body{display:flex;flex-direction:column;max-width:480px;margin:0 auto;min-height
 .whatsapp-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:16px;background:#25D366;color:#fff;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:700;cursor:pointer}
 .whatsapp-btn:hover{background:#1DA851}
 
+/* ── TODAY'S SHOPPING LIST ── */
+.today-shop-divider{display:flex;align-items:center;gap:10px;margin:22px 0 14px;color:var(--text2);font-size:14px;font-weight:700}
+.today-shop-divider::before,.today-shop-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.today-slot-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.today-slot-card.has-meal{border-color:var(--accent)}
+.today-slot-icon{font-size:22px;width:34px;text-align:center;flex-shrink:0}
+.today-slot-body{flex:1;min-width:0}
+.today-slot-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+.today-slot-name{font-size:13px;font-weight:600;color:var(--text);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.today-slot-hint{font-size:13px;color:var(--text3);cursor:pointer}
+.today-serving-row{display:flex;align-items:center;gap:5px;margin-top:4px}
+.today-serving-btn{border:none;background:var(--bg2);color:var(--accent);border-radius:5px;width:20px;height:20px;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1}
+.today-serving-val{font-size:12px;font-weight:700;color:var(--accent);min-width:12px;text-align:center}
+.today-slot-remove{border:none;background:none;color:var(--text3);font-size:22px;cursor:pointer;padding:0 2px;flex-shrink:0;line-height:1}
+.today-shop-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--card);border:1px solid var(--border);border-radius:9px;margin-bottom:6px}
+.today-shop-item.got{opacity:.45}
+.today-shop-item.got .si-name{text-decoration:line-through;color:var(--text3)}
+.today-shop-item .si-cb{width:18px;height:18px;border:2px solid var(--border);border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;transition:all .15s}
+.today-shop-item.got .si-cb{background:var(--olive);border-color:var(--olive);color:#fff}
+.today-shop-item .si-emoji{font-size:18px;flex-shrink:0}
+.today-shop-item .si-name{flex:1;font-size:13px;color:var(--text);min-width:0}
+.shop-stepper{display:flex;align-items:center;gap:3px;flex-shrink:0}
+.shop-stepper button{border:none;background:var(--bg2);color:var(--accent);border-radius:5px;width:22px;height:22px;font-size:15px;font-weight:700;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0}
+.shop-step-val{font-size:12px;font-weight:700;color:var(--accent);min-width:48px;text-align:center;background:var(--bg2);border-radius:5px;padding:2px 5px}
+
 /* ── PANTRY ── */
 .pantry-intro{font-size:13px;color:var(--text3);margin-bottom:14px}
 .pantry-grid{display:flex;flex-direction:column;gap:8px}
@@ -514,6 +539,11 @@ body{display:flex;flex-direction:column;max-width:480px;margin:0 auto;min-height
     <div class="planner-hint">Tap any slot to assign a meal</div>
     <div class="week-grid" id="week-grid"></div>
     <button class="fridge-suggest-btn" style="margin-top:12px" onclick="generateShoppingFromPlan()">🛒 Generate shopping list</button>
+
+    <div class="today-shop-divider"><span>🛒 Today's Shopping List</span></div>
+    <div id="today-shop-slots"></div>
+    <button class="fridge-suggest-btn" onclick="buildTodayShopList()" style="margin-top:4px">📋 Build Shopping List</button>
+    <div id="today-shop-list" style="margin-top:8px"></div>
   </section>
 
   <!-- HISTORY -->
@@ -716,7 +746,7 @@ function showSection(name){
   if(name==='meals') renderMealGrid();
   if(name==='history') renderHistory('all');
   if(name==='fridge') renderFridge();
-  if(name==='plan') renderPlanner();
+  if(name==='plan'){ renderPlanner(); renderTodaySlots(); }
   if(name==='home') renderHome();
 }
 
@@ -1314,6 +1344,271 @@ function generateShoppingFromPlan(){
   openShoppingSection([...mealIds]);
 }
 
+// ── TODAY'S SHOPPING LIST ──
+const TODAY_SLOT_CFG = [
+  {slot:'breakfast', label:'Breakfast', icon:'🌅'},
+  {slot:'lunch',     label:'Lunch',     icon:'☀️'},
+  {slot:'snack',     label:'Snack',     icon:'🍎'},
+  {slot:'dinner',    label:'Dinner',    icon:'🌙'},
+];
+
+let TODAY_SHOP = {
+  slots:    {breakfast:null, lunch:null, snack:null, dinner:null},
+  servings: {breakfast:1,    lunch:1,    snack:1,    dinner:1},
+};
+let _todayShopAgg = {};   // key -> {emoji,name,unit,qty,cat}
+let _todayChecked = {};   // key -> bool
+
+function renderTodaySlots(){
+  const container = document.getElementById('today-shop-slots');
+  if(!container) return;
+  container.innerHTML = '';
+  TODAY_SLOT_CFG.forEach(({slot, label, icon})=>{
+    const mealId  = TODAY_SHOP.slots[slot];
+    const meal    = mealId ? (window.__MEALS__||[]).find(m=>m.id===mealId) : null;
+    const serving = TODAY_SHOP.servings[slot];
+    const card = document.createElement('div');
+    card.className = 'today-slot-card'+(meal?' has-meal':'');
+
+    const iconEl = document.createElement('div');
+    iconEl.className = 'today-slot-icon';
+    iconEl.textContent = meal ? meal.emoji : icon;
+
+    const body = document.createElement('div');
+    body.className = 'today-slot-body';
+
+    const lbl = document.createElement('div');
+    lbl.className = 'today-slot-label';
+    lbl.textContent = label;
+    body.appendChild(lbl);
+
+    if(meal){
+      const nameEl = document.createElement('div');
+      nameEl.className = 'today-slot-name';
+      nameEl.textContent = truncate(meal.name, 26);
+      nameEl.onclick = ()=>openTodayPicker(slot);
+      body.appendChild(nameEl);
+
+      const servRow = document.createElement('div');
+      servRow.className = 'today-serving-row';
+
+      const minusBtn = document.createElement('button');
+      minusBtn.className = 'today-serving-btn';
+      minusBtn.textContent = '−';
+      minusBtn.onclick = e=>{ e.stopPropagation(); setTodayServing(slot,-1); };
+
+      const valEl = document.createElement('span');
+      valEl.className = 'today-serving-val';
+      valEl.textContent = serving;
+
+      const plusBtn = document.createElement('button');
+      plusBtn.className = 'today-serving-btn';
+      plusBtn.textContent = '+';
+      plusBtn.onclick = e=>{ e.stopPropagation(); setTodayServing(slot,1); };
+
+      const servLbl = document.createElement('span');
+      servLbl.style.cssText = 'font-size:11px;color:var(--text3)';
+      servLbl.textContent = 'serving'+(serving>1?'s':'');
+
+      servRow.appendChild(minusBtn);
+      servRow.appendChild(valEl);
+      servRow.appendChild(plusBtn);
+      servRow.appendChild(servLbl);
+      body.appendChild(servRow);
+    } else {
+      const hint = document.createElement('div');
+      hint.className = 'today-slot-hint';
+      hint.textContent = 'Tap to pick';
+      hint.onclick = ()=>openTodayPicker(slot);
+      body.appendChild(hint);
+    }
+
+    card.appendChild(iconEl);
+    card.appendChild(body);
+
+    if(meal){
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'today-slot-remove';
+      removeBtn.textContent = '×';
+      removeBtn.onclick = ()=>removeTodayMeal(slot);
+      card.appendChild(removeBtn);
+    }
+
+    container.appendChild(card);
+  });
+}
+
+function openTodayPicker(slot){
+  const cfg = TODAY_SLOT_CFG.find(c=>c.slot===slot);
+  document.getElementById('picker-title').textContent = 'Pick '+cfg.label;
+  const list = document.getElementById('picker-list');
+  list.innerHTML = '';
+  (window.__MEALS__||[]).filter(m=>m.type===slot).forEach(m=>{
+    const div = document.createElement('div');
+    div.className = 'meal-picker-item';
+    div.innerHTML = `<div class="meal-picker-emoji">${m.emoji}</div>
+      <div class="meal-picker-info">
+        <div class="meal-picker-name">${m.name}</div>
+        <div class="meal-picker-meta">⏱ ${m.time}min · 💪 ${m.protein}g · 🔥 ${m.calories}kcal</div>
+      </div>`;
+    div.onclick = ()=>assignTodayMeal(slot, m.id);
+    list.appendChild(div);
+  });
+  document.getElementById('meal-picker-overlay').classList.add('open');
+}
+
+function assignTodayMeal(slot, id){
+  TODAY_SHOP.slots[slot] = id;
+  _todayShopAgg = {};
+  _todayChecked = {};
+  closeMealPicker();
+  renderTodaySlots();
+  document.getElementById('today-shop-list').innerHTML = '';
+}
+
+function removeTodayMeal(slot){
+  TODAY_SHOP.slots[slot] = null;
+  _todayShopAgg = {};
+  _todayChecked = {};
+  renderTodaySlots();
+  document.getElementById('today-shop-list').innerHTML = '';
+}
+
+function setTodayServing(slot, delta){
+  TODAY_SHOP.servings[slot] = Math.max(1, Math.min(5, TODAY_SHOP.servings[slot]+delta));
+  renderTodaySlots();
+}
+
+function buildTodayShopList(){
+  const agg = {};
+  TODAY_SLOT_CFG.forEach(({slot})=>{
+    const mealId = TODAY_SHOP.slots[slot];
+    if(!mealId) return;
+    const meal = (window.__MEALS__||[]).find(m=>m.id===mealId);
+    if(!meal) return;
+    const serving = TODAY_SHOP.servings[slot];
+    (meal.ingredients||[]).forEach(ing=>{
+      const key = ing.name.toLowerCase().trim()+'|'+ing.unit;
+      if(!agg[key]) agg[key]={emoji:ing.emoji, name:ing.name, unit:ing.unit, qty:0, cat:getCat(ing.name)};
+      agg[key].qty += (ing.qty||0)*serving;
+    });
+  });
+
+  const container = document.getElementById('today-shop-list');
+  if(!Object.keys(agg).length){
+    container.innerHTML='<div class="no-meals" style="margin-top:10px">Pick at least one meal above first.</div>';
+    return;
+  }
+
+  _todayShopAgg = agg;
+  _todayChecked = {};
+
+  // Group by category
+  const cats = {};
+  Object.entries(agg).forEach(([key,item])=>{
+    if(!cats[item.cat]) cats[item.cat]=[];
+    cats[item.cat].push({key, ...item});
+  });
+
+  container.innerHTML = '';
+
+  Object.entries(cats).forEach(([cat, items])=>{
+    const titleEl = document.createElement('div');
+    titleEl.className = 'shopping-section-title';
+    titleEl.textContent = cat;
+    container.appendChild(titleEl);
+
+    items.forEach(item=>{
+      const isGrams = item.unit==='g'||item.unit==='ml';
+      const step = isGrams ? 10 : 1;
+
+      const row = document.createElement('div');
+      row.className = 'today-shop-item';
+
+      const cb = document.createElement('div');
+      cb.className = 'si-cb';
+      cb.onclick = ()=>todayToggleItem(item.key, row, cb);
+
+      const emojiEl = document.createElement('span');
+      emojiEl.className = 'si-emoji';
+      emojiEl.textContent = item.emoji||'🥄';
+
+      const nameEl = document.createElement('span');
+      nameEl.className = 'si-name';
+      nameEl.textContent = item.name;
+
+      const stepper = document.createElement('div');
+      stepper.className = 'shop-stepper';
+
+      const minusBtn = document.createElement('button');
+      minusBtn.textContent = '−';
+
+      const valEl = document.createElement('span');
+      valEl.className = 'shop-step-val';
+      valEl.textContent = formatQty(item.qty)+' '+item.unit;
+
+      const plusBtn = document.createElement('button');
+      plusBtn.textContent = '+';
+
+      minusBtn.onclick = ()=>todayStepItem(item.key, -step, isGrams, valEl);
+      plusBtn.onclick  = ()=>todayStepItem(item.key,  step, isGrams, valEl);
+
+      stepper.appendChild(minusBtn);
+      stepper.appendChild(valEl);
+      stepper.appendChild(plusBtn);
+
+      row.appendChild(cb);
+      row.appendChild(emojiEl);
+      row.appendChild(nameEl);
+      row.appendChild(stepper);
+      container.appendChild(row);
+    });
+  });
+
+  const waBtn = document.createElement('button');
+  waBtn.className = 'whatsapp-btn';
+  waBtn.innerHTML = '<span>📱</span> Share on WhatsApp';
+  waBtn.onclick = shareTodayListWA;
+  container.appendChild(waBtn);
+}
+
+function todayToggleItem(key, row, cb){
+  _todayChecked[key] = !_todayChecked[key];
+  row.classList.toggle('got', !!_todayChecked[key]);
+  cb.textContent = _todayChecked[key] ? '✓' : '';
+}
+
+function todayStepItem(key, step, isGrams, valEl){
+  if(!_todayShopAgg[key]) return;
+  const min = isGrams ? 10 : 1;
+  _todayShopAgg[key].qty = Math.max(min, _todayShopAgg[key].qty+step);
+  valEl.textContent = formatQty(_todayShopAgg[key].qty)+' '+_todayShopAgg[key].unit;
+}
+
+function shareTodayListWA(){
+  const cats = {};
+  Object.entries(_todayShopAgg).forEach(([key,item])=>{
+    if(_todayChecked[key]) return;
+    if(!cats[item.cat]) cats[item.cat]=[];
+    cats[item.cat].push(item);
+  });
+  const mealNames = TODAY_SLOT_CFG.map(c=>{
+    const id = TODAY_SHOP.slots[c.slot];
+    const m = id ? (window.__MEALS__||[]).find(x=>x.id===id) : null;
+    return m ? m.emoji+' '+m.name : null;
+  }).filter(Boolean);
+  let txt = '🛒 *Today\'s Shopping List*\n';
+  if(mealNames.length) txt += '_'+mealNames.join(' · ')+'_\n';
+  txt += '\n';
+  Object.entries(cats).forEach(([cat,items])=>{
+    txt += '*'+cat+'*\n';
+    items.forEach(i=>{ txt += '• '+(i.emoji||'')+' '+i.name+' — '+formatQty(i.qty)+' '+i.unit+'\n'; });
+    txt += '\n';
+  });
+  txt += '_From Bachelor Meal Planning app_';
+  window.open('https://wa.me/?text='+encodeURIComponent(txt), '_blank');
+}
+
 // ── SHOPPING LIST ──
 let _shopMealIds = [];
 
@@ -1374,7 +1669,7 @@ function showShoppingOverlay(){
 
 function getCat(name){
   const n=name.toLowerCase();
-  if(['egg','chicken','paneer','tuna','prawn','tofu','dal','lentil','peanut','chana'].some(k=>n.includes(k))) return '🥩 Proteins';
+  if(['egg','chicken','beef','mutton','paneer','tuna','prawn','tofu','dal','lentil','peanut','chana'].some(k=>n.includes(k))) return '🥩 Proteins';
   if(['tomato','onion','potato','carrot','cucumber','spinach','coriander','mint','ginger','garlic','capsicum','bean','peas','cauliflower','cabbage'].some(k=>n.includes(k))) return '🥦 Veggies';
   if(['banana','apple','lemon','mango','orange'].some(k=>n.includes(k))) return '🍌 Fruits';
   if(['milk','curd','yogurt','butter','cheese','cream'].some(k=>n.includes(k))) return '🥛 Dairy';
@@ -1537,6 +1832,7 @@ function init(){
   initTabCounts();
   renderHome();
   renderMealGrid();
+  renderTodaySlots();
 
   // Add pantry button to history section
   const histSec = document.getElementById('sec-history');
