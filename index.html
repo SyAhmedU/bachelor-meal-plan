@@ -1937,7 +1937,36 @@ function init(){
 document.addEventListener('DOMContentLoaded', init);
 
 // ── COOKING MODE ──
-let CM = { stepIdx: 0, meal: null, timerRemaining: 0, timerOriginal: 0, timerInterval: null, timerRunning: false };
+let CM = { stepIdx: 0, meal: null, timerRemaining: 0, timerOriginal: 0, timerInterval: null, timerRunning: false, wakeLock: null };
+
+async function requestWakeLock(){
+  if('wakeLock' in navigator){
+    try { CM.wakeLock = await navigator.wakeLock.request('screen'); } catch(e){}
+  }
+}
+function releaseWakeLock(){
+  if(CM.wakeLock){ CM.wakeLock.release().catch(()=>{}); CM.wakeLock = null; }
+}
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState==='visible' && document.getElementById('cooking-overlay').classList.contains('open')){
+    requestWakeLock();
+  }
+});
+
+function playCookBeep(){
+  try {
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    [0, 0.35, 0.7].forEach(delay=>{
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = 880; osc.type = 'sine';
+      gain.gain.setValueAtTime(0.5, ctx.currentTime+delay);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+delay+0.3);
+      osc.start(ctx.currentTime+delay); osc.stop(ctx.currentTime+delay+0.35);
+    });
+  } catch(e){}
+}
 
 function startCookingMode(){
   const m = STATE.currentMeal;
@@ -1946,14 +1975,15 @@ function startCookingMode(){
   CM.stepIdx = 0;
   stopCookTimer();
   renderCookStep();
-  // Build ingredient list once
   buildCookIngredients(m);
+  requestWakeLock();
   document.getElementById('cooking-overlay').classList.add('open');
   document.getElementById('cooking-overlay').scrollTop = 0;
 }
 
 function exitCookingMode(){
   stopCookTimer();
+  releaseWakeLock();
   document.getElementById('cooking-overlay').classList.remove('open');
 }
 
@@ -2032,6 +2062,7 @@ function toggleCookTimer(){
       updateCookTimerDisplay();
       if(CM.timerRemaining <= 0){
         stopCookTimer();
+        playCookBeep();
         if('vibrate' in navigator) navigator.vibrate([300,100,300,100,300]);
         const circle = document.getElementById('cm-timer-circle');
         circle.className = 'cook-timer-circle done-flash';
@@ -2050,10 +2081,10 @@ function stopCookTimer(){
 
 function updateCookTimerDisplay(){
   const s = CM.timerRemaining;
-  const m = Math.floor(s/60);
-  const sec = s % 60;
-  const display = m > 0 ? m+'m '+String(sec).padStart(2,'0')+'s' : s+'s';
-  document.getElementById('cm-timer-time').textContent = display;
+  const mins = Math.floor(s/60);
+  const secs = s % 60;
+  document.getElementById('cm-timer-time').textContent =
+    String(mins).padStart(2,'0') + ':' + String(secs).padStart(2,'0');
 }
 
 function buildCookIngredients(m){
