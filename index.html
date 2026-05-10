@@ -327,6 +327,9 @@ body{display:flex;flex-direction:column;max-width:480px;margin:0 auto;min-height
 .meal-picker-head{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .meal-picker-title{font-size:16px;font-weight:700;color:var(--text)}
 .meal-picker-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--text3)}
+.meal-picker-search{padding:8px 12px;border-bottom:1px solid var(--border)}
+.meal-picker-search input{width:100%;box-sizing:border-box;border:1px solid var(--border);border-radius:9px;padding:8px 12px;font-size:14px;background:var(--bg2);color:var(--text);outline:none}
+.meal-picker-search input::placeholder{color:var(--text3)}
 .meal-picker-list{overflow-y:auto;flex:1;padding:10px}
 .meal-picker-item{display:flex;align-items:center;gap:10px;padding:10px 8px;border-radius:10px;cursor:pointer;transition:background .2s}
 .meal-picker-item:hover{background:var(--bg2)}
@@ -748,6 +751,9 @@ body{display:flex;flex-direction:column;max-width:480px;margin:0 auto;min-height
     <div class="meal-picker-head">
       <div class="meal-picker-title" id="picker-title">Pick a meal</div>
       <button class="meal-picker-close" onclick="closeMealPicker()">✕</button>
+    </div>
+    <div class="meal-picker-search">
+      <input type="text" id="picker-search" placeholder="Search meals…" oninput="filterPickerList(this.value)">
     </div>
     <div class="meal-picker-list" id="picker-list"></div>
   </div>
@@ -1384,30 +1390,21 @@ function truncate(str, n){ return str.length>n?str.slice(0,n-1)+'…':str; }
 
 function openMealPicker(dk, slot){
   STATE.pickerTarget = {dk, slot};
+  _pickerSlot = slot;
+  _pickerMode = 'planner';
   const title = document.getElementById('picker-title');
   title.textContent = 'Pick '+SLOT_LABEL[slot];
-  const list = document.getElementById('picker-list');
-  list.innerHTML='';
-  const meals = (window.__MEALS__||[]).filter(m=>m.type===slot);
-  meals.forEach(m=>{
-    const div=document.createElement('div');
-    div.className='meal-picker-item';
-    div.innerHTML=`<div class="meal-picker-emoji">${m.emoji}</div>
-      <div class="meal-picker-info">
-        <div class="meal-picker-name">${m.name}</div>
-        <div class="meal-picker-meta">⏱ ${m.time}min · 💪 ${m.protein}g · 🔥 ${m.calories}kcal</div>
-      </div>`;
-    div.onclick=()=>assignMeal(m.id);
-    list.appendChild(div);
-  });
-  // Clear option
+  document.getElementById('picker-search').value = '';
+  filterPickerList('');
+  // Append clear option
   const clr=document.createElement('div');
   clr.className='meal-picker-item';
   clr.innerHTML='<div class="meal-picker-emoji">🗑️</div><div class="meal-picker-info"><div class="meal-picker-name">Clear slot</div></div>';
   clr.onclick=()=>assignMeal(null);
-  list.appendChild(clr);
+  document.getElementById('picker-list').appendChild(clr);
 
   document.getElementById('meal-picker-overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('picker-search').focus(), 200);
 }
 
 function assignMeal(id){
@@ -1533,12 +1530,25 @@ function renderTodaySlots(){
   });
 }
 
+let _pickerSlot = '';
+let _pickerMode = 'today'; // 'today' | 'planner'
+
 function openTodayPicker(slot){
+  _pickerSlot = slot;
+  _pickerMode = 'today';
   const cfg = TODAY_SLOT_CFG.find(c=>c.slot===slot);
   document.getElementById('picker-title').textContent = 'Pick '+cfg.label;
+  document.getElementById('picker-search').value = '';
+  filterPickerList('');
+  document.getElementById('meal-picker-overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('picker-search').focus(), 200);
+}
+
+function filterPickerList(q){
   const list = document.getElementById('picker-list');
   list.innerHTML = '';
-  (window.__MEALS__||[]).filter(m=>m.type===slot).forEach(m=>{
+  const term = q.toLowerCase().trim();
+  (window.__MEALS__||[]).filter(m=>m.type===_pickerSlot && (!term || m.name.toLowerCase().includes(term) || (m.nameTA||'').toLowerCase().includes(term) || (m.nameUR||'').toLowerCase().includes(term))).forEach(m=>{
     const div = document.createElement('div');
     div.className = 'meal-picker-item';
     div.innerHTML = `<div class="meal-picker-emoji">${m.emoji}</div>
@@ -1546,10 +1556,9 @@ function openTodayPicker(slot){
         <div class="meal-picker-name">${m.name}</div>
         <div class="meal-picker-meta">⏱ ${m.time}min · 💪 ${m.protein}g · 🔥 ${m.calories}kcal</div>
       </div>`;
-    div.onclick = ()=>assignTodayMeal(slot, m.id);
+    div.onclick = _pickerMode==='today' ? ()=>assignTodayMeal(_pickerSlot, m.id) : ()=>assignMeal(m.id);
     list.appendChild(div);
   });
-  document.getElementById('meal-picker-overlay').classList.add('open');
 }
 
 function assignTodayMeal(slot, id){
