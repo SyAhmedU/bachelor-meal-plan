@@ -172,6 +172,12 @@ body{display:flex;flex-direction:column;max-width:480px;margin:0 auto;min-height
 .effort-btn{flex:1;border:none;background:none;color:var(--text3);border-radius:9px;padding:6px 4px;font-size:12px;font-weight:700;cursor:pointer;transition:all .22s;text-align:center}
 .effort-btn.active{background:var(--card);color:var(--accent);box-shadow:var(--shadow-card)}
 
+.meat-row{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.meat-btn{border:none;background:var(--bg2);color:var(--text3);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;transition:all .22s;white-space:nowrap}
+.meat-btn.active{background:var(--accent);color:#fff;box-shadow:var(--shadow-card)}
+.badge-overnight{background:#2c1b47;color:#e0b4ff;font-size:10px;font-weight:700;border-radius:6px;padding:2px 6px}
+#ro-nightprep-section.overnight-critical{border:2px solid var(--purple);border-radius:var(--radius-sm);padding:10px;background:rgba(123,94,167,.08)}
+
 .meal-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .meal-card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:0;cursor:pointer;transition:box-shadow .2s,transform .15s;box-shadow:var(--shadow-card);overflow:hidden;position:relative}
 .meal-card:active{transform:scale(.97)}
@@ -482,6 +488,14 @@ body{display:flex;flex-direction:column;max-width:480px;margin:0 auto;min-height
       <button class="effort-btn" data-effort="medium" onclick="setEffort('medium')">🔥 Medium</button>
       <button class="effort-btn" data-effort="hard" onclick="setEffort('hard')">👨‍🍳 Hard</button>
     </div>
+    <div class="meat-row" id="meat-row">
+      <button class="meat-btn active" data-meat="all" onclick="setMeatFilter('all')">All</button>
+      <button class="meat-btn" data-meat="chicken" onclick="setMeatFilter('chicken')">🍗 Chicken</button>
+      <button class="meat-btn" data-meat="egg" onclick="setMeatFilter('egg')">🥚 Egg</button>
+      <button class="meat-btn" data-meat="beef" onclick="setMeatFilter('beef')">🥩 Beef</button>
+      <button class="meat-btn" data-meat="mutton" onclick="setMeatFilter('mutton')">🐑 Mutton</button>
+      <button class="meat-btn" data-meat="veg" onclick="setMeatFilter('veg')">🥦 Veg</button>
+    </div>
     <div class="meal-grid" id="meal-grid"></div>
   </section>
 
@@ -637,6 +651,7 @@ body{display:flex;flex-direction:column;max-width:480px;margin:0 auto;min-height
 let STATE = {
   mealType: 'breakfast',
   effort: 'all',
+  meatFilter: 'all',
   serving: 1,
   currentMeal: null,
   stepTimers: {},
@@ -886,17 +901,35 @@ function setEffort(e){
   renderMealGrid();
 }
 
+function getMeatType(m){
+  const text=((m.ingredients||[]).map(i=>i.name).join(' ')+' '+m.name).toLowerCase();
+  if(text.includes('beef')) return 'beef';
+  if(text.includes('mutton')) return 'mutton';
+  if(text.includes('chicken')) return 'chicken';
+  if(text.includes('fish')||text.includes('prawn')||text.includes('tuna')) return 'fish';
+  if(text.includes('egg')) return 'egg';
+  return 'veg';
+}
+
+function setMeatFilter(meat){
+  STATE.meatFilter = meat;
+  document.querySelectorAll('.meat-btn').forEach(b=>b.classList.toggle('active', b.dataset.meat===meat));
+  renderMealGrid();
+}
+
 function renderMealGrid(){
   const grid = document.getElementById('meal-grid');
   let meals = (window.__MEALS__||[]).filter(m=>m.type===STATE.mealType);
   if(STATE.effort!=='all') meals = meals.filter(m=>m.effort===STATE.effort);
+  if(STATE.meatFilter!=='all') meals = meals.filter(m=>getMeatType(m)===STATE.meatFilter);
   grid.innerHTML = '';
   if(!meals.length){
-    grid.innerHTML = '<div class="no-meals">No meals for this filter.<br>Try a different effort level.</div>';
+    grid.innerHTML = '<div class="no-meals">No meals for this filter.<br>Try a different filter.</div>';
     return;
   }
   meals.forEach(m=>{
     const rating = STATE.ratings[m.id];
+    const isOvernight = !!(m.nightPrep && /overnight/i.test(m.nightPrep));
     const card = document.createElement('div');
     card.className='meal-card';
     card.innerHTML = `
@@ -911,6 +944,7 @@ function renderMealGrid(){
           <span class="badge badge-effort-${m.effort}">${capitalize(m.effort)}</span>
           <span class="badge badge-time">⏱ ${m.time}m</span>
           <span class="badge badge-protein">💪 ${m.protein}g</span>
+          ${isOvernight?'<span class="badge badge-overnight">🌙 Overnight</span>':''}
         </div>
       </div>
       <div class="meal-card-accent-bar type-${m.type}"></div>`;
@@ -949,8 +983,14 @@ function openRecipe(id){
   tipSec.style.display = m.tip ? 'block' : 'none';
 
   const npSec = document.getElementById('ro-nightprep-section');
-  if(m.nightPrep){ npSec.style.display='block'; document.getElementById('ro-nightprep').textContent=m.nightPrep; }
-  else npSec.style.display='none';
+  if(m.nightPrep){
+    npSec.style.display='block';
+    document.getElementById('ro-nightprep').textContent=m.nightPrep;
+    npSec.classList.toggle('overnight-critical', /overnight/i.test(m.nightPrep));
+  } else {
+    npSec.style.display='none';
+    npSec.classList.remove('overnight-critical');
+  }
 
   const rating = STATE.ratings[m.id];
   document.getElementById('rate-like').className = 'rate-btn'+(rating==='like'?' selected-like':'');
@@ -1091,7 +1131,7 @@ function markCooked(){
 
 // ── FRIDGE ──
 const FRIDGE_CATS = [
-  { label:'Proteins', items: ['Eggs','Chicken','Paneer','Fish','Toor dal','Moong dal','Masoor dal','Chana dal','Chickpeas','Peanut butter'] },
+  { label:'Proteins', items: ['Eggs','Chicken','Beef','Mutton','Paneer','Fish','Toor dal','Moong dal','Masoor dal','Chana dal','Chickpeas','Peanut butter'] },
   { label:'Veggies & Fruits', items: ['Onion','Tomato','Potato','Green chilli','Cauliflower','Bottle gourd','Brinjal','Green peas','Banana','Lemon juice','Coriander leaves','Curry leaves','Mint leaves'] },
   { label:'Dairy & Fats', items: ['Milk','Curd','Butter','Fresh coconut','Coconut milk'] },
   { label:'Grains & Bread', items: ['Bread slices','Rice','Wheat atta','Poha','Oats','Besan','Dosa batter','Semiya','Roti'] },
@@ -1099,7 +1139,7 @@ const FRIDGE_CATS = [
 ];
 
 const FRIDGE_EMOJI = {
-  'Eggs':'🥚','Chicken':'🍗','Paneer':'🧀','Fish':'🐟','Toor dal':'🫘','Moong dal':'🫘','Masoor dal':'🫘','Chana dal':'🫘','Chickpeas':'🫘','Peanut butter':'🥜',
+  'Eggs':'🥚','Chicken':'🍗','Beef':'🥩','Mutton':'🐑','Paneer':'🧀','Fish':'🐟','Toor dal':'🫘','Moong dal':'🫘','Masoor dal':'🫘','Chana dal':'🫘','Chickpeas':'🫘','Peanut butter':'🥜',
   'Onion':'🧅','Tomato':'🍅','Potato':'🥔','Green chilli':'🌶️','Cauliflower':'🥦','Bottle gourd':'🥒','Brinjal':'🍆','Green peas':'🫘','Banana':'🍌','Lemon juice':'🍋','Coriander leaves':'🌿','Curry leaves':'🌿','Mint leaves':'🌿',
   'Milk':'🥛','Curd':'🫙','Butter':'🧈','Fresh coconut':'🥥','Coconut milk':'🥥',
   'Bread slices':'🍞','Rice':'🍚','Wheat atta':'🌾','Poha':'🌾','Oats':'🥣','Besan':'🌾','Dosa batter':'🫙','Semiya':'🍜','Roti':'🫓',
