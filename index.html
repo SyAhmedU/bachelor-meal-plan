@@ -623,6 +623,12 @@ body{display:flex;flex-direction:column;max-width:480px;margin:0 auto;min-height
       <button class="effort-btn" data-effort="medium" onclick="setEffort('medium')">🔥 Medium</button>
       <button class="effort-btn" data-effort="hard" onclick="setEffort('hard')">👨‍🍳 Hard</button>
     </div>
+    <div class="effort-row" style="margin-bottom:10px">
+      <button class="effort-btn active time-btn" data-mins="0" onclick="setTimeFilter(0)">Any time</button>
+      <button class="effort-btn time-btn" data-mins="15" onclick="setTimeFilter(15)">≤ 15 min</button>
+      <button class="effort-btn time-btn" data-mins="30" onclick="setTimeFilter(30)">≤ 30 min</button>
+      <button class="effort-btn time-btn" data-mins="45" onclick="setTimeFilter(45)">≤ 45 min</button>
+    </div>
     <div class="meat-row" id="meat-row">
       <button class="meat-btn active" data-meat="all" onclick="setMeatFilter('all')">All</button>
       <button class="meat-btn" data-meat="chicken" onclick="setMeatFilter('chicken')">🍗 Chicken</button>
@@ -795,6 +801,7 @@ let STATE = {
   mealType: 'breakfast',
   effort: 'all',
   meatFilter: 'all',
+  timeFilter: 0,
   serving: 1,
   currentMeal: null,
   stepTimers: {},
@@ -1071,11 +1078,18 @@ function setMeatFilter(meat){
   renderMealGrid();
 }
 
+function setTimeFilter(mins){
+  STATE.timeFilter = mins;
+  document.querySelectorAll('.time-btn').forEach(b=>b.classList.toggle('active', Number(b.dataset.mins)===mins));
+  renderMealGrid();
+}
+
 function renderMealGrid(){
   const grid = document.getElementById('meal-grid');
   let meals = (window.__MEALS__||[]).filter(m=>m.type===STATE.mealType);
   if(STATE.effort!=='all') meals = meals.filter(m=>m.effort===STATE.effort);
   if(STATE.meatFilter!=='all') meals = meals.filter(m=>getMeatType(m)===STATE.meatFilter);
+  if(STATE.timeFilter>0) meals = meals.filter(m=>m.time<=STATE.timeFilter);
   grid.innerHTML = '';
   if(!meals.length){
     grid.innerHTML = '<div class="no-meals">No meals for this filter.<br>Try a different filter.</div>';
