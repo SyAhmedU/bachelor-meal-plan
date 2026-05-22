@@ -321,6 +321,22 @@ body{display:flex;flex-direction:column;max-width:480px;margin:0 auto;min-height
 .day-slot-meal.empty{color:var(--text3);font-style:italic;font-size:12px}
 .planner-hint{font-size:12px;color:var(--text3);text-align:center;margin-bottom:12px}
 
+/* ── WEEK NUTRITION SUMMARY ── */
+.week-nutrition{margin-top:14px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.wn-header{background:var(--bg2);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.wn-title{font-size:13px;font-weight:700;color:var(--text)}
+.wn-total{display:flex;gap:12px}
+.wn-total-item{font-size:11px;font-weight:700;color:var(--muted)}
+.wn-total-item span{color:var(--text)}
+.wn-rows{padding:8px 14px;display:flex;flex-direction:column;gap:6px}
+.wn-row{display:flex;align-items:center;gap:8px}
+.wn-day{font-size:11px;font-weight:700;color:var(--muted);min-width:32px}
+.wn-bar-wrap{flex:1;background:var(--bg2);border-radius:99px;height:8px;overflow:hidden;position:relative}
+.wn-bar-cal{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--gold),#f59e0b);transition:width .4s ease}
+.wn-bar-pro{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--olive),#65a30d);transition:width .4s ease;position:absolute;top:0;left:0;opacity:.7}
+.wn-nums{font-size:10px;font-weight:700;color:var(--muted);text-align:right;min-width:88px}
+.wn-empty{font-size:12px;color:var(--text3);text-align:center;padding:12px 0}
+
 /* ── MEAL PICKER FOR PLANNER ── */
 #meal-picker-overlay{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.5)}
 #meal-picker-overlay.open{display:flex;align-items:flex-end;justify-content:center}
@@ -655,6 +671,7 @@ body{display:flex;flex-direction:column;max-width:480px;margin:0 auto;min-height
     <div class="planner-hint">Tap any slot to assign a meal</div>
     <div class="week-grid" id="week-grid"></div>
     <button class="fridge-suggest-btn" style="margin-top:12px" onclick="generateShoppingFromPlan()">🛒 Generate shopping list</button>
+    <div id="week-nutrition"></div>
 
     <div class="today-shop-divider"><span>🛒 Today's Shopping List</span></div>
     <div id="today-shop-slots"></div>
@@ -866,7 +883,7 @@ function showSection(name){
   if(name==='meals') renderMealGrid();
   if(name==='history') renderHistory('all');
   if(name==='fridge') renderFridge();
-  if(name==='plan'){ renderPlanner(); renderTodaySlots(); }
+  if(name==='plan'){ renderPlanner(); renderWeekNutrition(); renderTodaySlots(); }
   if(name==='home') renderHome();
 }
 
@@ -1428,6 +1445,54 @@ function renderPlanner(){
   });
 }
 
+function renderWeekNutrition(){
+  const el = document.getElementById('week-nutrition');
+  if(!el) return;
+  const allMeals = window.__MEALS__ || [];
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  let totalCal=0, totalPro=0, maxDayCal=0;
+  const dayData = getWeekDays().map(d=>{
+    const dk = dayKey(d);
+    const slots = STATE.plan[dk] || {};
+    let cal=0, pro=0;
+    Object.values(slots).forEach(id=>{
+      if(!id) return;
+      const m = allMeals.find(x=>x.id===id);
+      if(m){ cal+=(m.calories||0); pro+=(m.protein||0); }
+    });
+    totalCal+=cal; totalPro+=pro;
+    if(cal>maxDayCal) maxDayCal=cal;
+    return {label:days[d.getDay()], dk, cal, pro};
+  });
+  if(maxDayCal===0){
+    el.innerHTML='<div class="week-nutrition"><div class="wn-header"><span class="wn-title">📊 Weekly Nutrition</span></div><div class="wn-rows"><p class="wn-empty">Plan some meals to see nutrition totals</p></div></div>';
+    return;
+  }
+  const rows = dayData.map(d=>{
+    const pct = maxDayCal>0?Math.round(d.cal/maxDayCal*100):0;
+    const proPct = maxDayCal>0?Math.round(d.pro*4/maxDayCal*100):0; // protein kcal share (4 kcal/g)
+    return `<div class="wn-row">
+      <div class="wn-day">${d.label}</div>
+      <div class="wn-bar-wrap">
+        <div class="wn-bar-cal" style="width:${pct}%"></div>
+        <div class="wn-bar-pro" style="width:${proPct}%"></div>
+      </div>
+      <div class="wn-nums">${d.cal?d.cal+' kcal':''} ${d.pro?'· '+d.pro+'g':''}</div>
+    </div>`;
+  }).join('');
+  el.innerHTML=`<div class="week-nutrition">
+    <div class="wn-header">
+      <span class="wn-title">📊 Weekly Nutrition</span>
+      <div class="wn-total">
+        <span class="wn-total-item">🔥 <span>${totalCal} kcal</span></span>
+        <span class="wn-total-item">💪 <span>${totalPro}g protein</span></span>
+        <span class="wn-total-item">📅 <span>~${Math.round(totalCal/7)} kcal/day</span></span>
+      </div>
+    </div>
+    <div class="wn-rows">${rows}</div>
+  </div>`;
+}
+
 function truncate(str, n){ return str.length>n?str.slice(0,n-1)+'…':str; }
 
 function openMealPicker(dk, slot){
@@ -1457,6 +1522,7 @@ function assignMeal(id){
   save('plan', STATE.plan);
   closeMealPicker();
   renderPlanner();
+  renderWeekNutrition();
 }
 
 function closeMealPicker(){
