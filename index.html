@@ -2504,8 +2504,8 @@ function openEquipmentGuide(){
 
 // ── SEARCH ──
 const TYPE_LABELS = {breakfast:'🍳 Breakfast', lunch:'🥗 Lunch', snack:'🍌 Snack', dinner:'🍛 Dinner'};
-
-function handleSearch(raw){
+let _searchTimer = null;
+const _origHandleSearch = function handleSearchImpl(raw){
   const q = raw.trim().toLowerCase();
   const clearBtn = document.getElementById('search-clear');
   const overlay  = document.getElementById('search-overlay');
@@ -2555,6 +2555,16 @@ function handleSearch(raw){
     div.onclick = ()=>{ clearSearch(); openRecipe(m.id); };
     list.appendChild(div);
   });
+};
+
+function handleSearch(raw){
+  clearTimeout(_searchTimer);
+  const clearBtn = document.getElementById('search-clear');
+  const overlay  = document.getElementById('search-overlay');
+  clearBtn.style.display = raw.trim() ? 'block' : 'none';
+  if(!raw.trim()){ overlay.classList.remove('open'); return; }
+  overlay.classList.add('open');
+  _searchTimer = setTimeout(()=>_origHandleSearch(raw), 150);
 }
 
 function clearSearch(){
