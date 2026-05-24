@@ -669,9 +669,13 @@ body{display:flex;flex-direction:column;max-width:480px;margin:0 auto;min-height
   <!-- PLANNER -->
   <section id="sec-plan" class="section">
     <div class="section-heading">📆 Weekly Planner</div>
-    <div class="planner-hint">Tap any slot to assign a meal</div>
+    <div class="planner-hint">Tap any slot to assign a meal, or auto-fill an entire week</div>
     <div class="week-grid" id="week-grid"></div>
-    <button class="fridge-suggest-btn" style="margin-top:12px" onclick="generateShoppingFromPlan()">🛒 Generate shopping list</button>
+    <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
+      <button class="fridge-suggest-btn" style="flex:1; min-width:200px; margin-top:0;" onclick="surpriseMePlan()">🎲 Surprise me — fill the week</button>
+      <button class="fridge-suggest-btn" style="flex:1; min-width:200px; margin-top:0;" onclick="generateShoppingFromPlan()">🛒 Generate shopping list</button>
+    </div>
+    <div class="planner-hint" style="margin-top:8px; opacity:.7;">Surprise picks rotate meals so you don't eat the same thing twice in a row.</div>
     <div id="week-nutrition"></div>
 
     <div class="today-shop-divider"><span>🛒 Today's Shopping List</span></div>
@@ -1528,6 +1532,75 @@ function assignMeal(id){
 
 function closeMealPicker(){
   document.getElementById('meal-picker-overlay').classList.remove('open');
+}
+
+// ── SURPRISE-ME WEEK GENERATOR ──
+// Fills every empty slot for the next 7 days. By default it skips slots
+// that already have a meal; pass `overwrite:true` to wipe the week first.
+// Picks rotate without repeating two days in a row, and respect the meal's
+// `type` field (breakfast/lunch/snack/dinner).
+function surpriseMePlan(){
+  const allMeals = window.__MEALS__ || [];
+  if (!allMeals.length) { alert('No meals loaded.'); return; }
+
+  // Detect if planner already has anything → confirm before wiping
+  const hasExisting = Object.values(STATE.plan).some(day => Object.values(day).some(Boolean));
+  if (hasExisting) {
+    if (!confirm('Replace the current week with a fresh random plan?')) return;
+    STATE.plan = {};
+  }
+
+  const byType = { breakfast: [], lunch: [], snack: [], dinner: [] };
+  for (const m of allMeals) {
+    if (byType[m.type]) byType[m.type].push(m);
+  }
+
+  // Fisher-Yates so we get a stable rotation per call without repeating.
+  const shuffle = arr => {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  };
+
+  const days = getWeekDays();
+  const queues = {
+    breakfast: shuffle(byType.breakfast),
+    lunch:     shuffle(byType.lunch),
+    snack:     shuffle(byType.snack),
+    dinner:    shuffle(byType.dinner),
+  };
+  const cursor = { breakfast: 0, lunch: 0, snack: 0, dinner: 0 };
+
+  let filled = 0;
+  for (const d of days) {
+    const dk = dayKey(d);
+    if (!STATE.plan[dk]) STATE.plan[dk] = {};
+    for (const slot of WEEK_SLOTS) {
+      if (STATE.plan[dk][slot]) continue; // respect anything already set
+      const queue = queues[slot];
+      if (!queue.length) continue;
+      const meal = queue[cursor[slot] % queue.length];
+      cursor[slot]++;
+      STATE.plan[dk][slot] = meal.id;
+      filled++;
+    }
+  }
+
+  save('plan', STATE.plan);
+  renderPlanner();
+  renderWeekNutrition();
+  renderTodaySlots();
+  // Lightweight toast — re-uses existing toast styles if present, else falls back to alert
+  try {
+    const t = document.createElement('div');
+    t.textContent = `🎲 Filled ${filled} slot${filled === 1 ? '' : 's'} for the week`;
+    t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#0E0E18;color:#fff;padding:10px 18px;border-radius:99px;font-size:14px;font-weight:600;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.25)';
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 2200);
+  } catch { /* ignore */ }
 }
 
 function generateShoppingFromPlan(){
