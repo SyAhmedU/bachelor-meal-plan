@@ -19,9 +19,52 @@
 <meta name="twitter:title" content="Meal Planner — 200+ Halal Recipes">
 <meta name="twitter:description" content="Weekly planner · shopping list · pantry · nutrition. Mobile-first. Offline.">
 <meta name="twitter:image" content="https://syahmedu.github.io/bachelor-meal-plan/og.svg">
+<meta name="twitter:image:alt" content="Meal Planner — a mobile-first halal meal planner with 200+ recipes.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="author" content="Syed Ahmed">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Meal Planner — Halal Recipes for the Busy Bachelor",
+  "url": "https://syahmedu.github.io/bachelor-meal-plan/",
+  "applicationCategory": "LifestyleApplication",
+  "operatingSystem": "Web browser",
+  "description": "A mobile-first halal meal planner with 200+ recipes, weekly auto-fill, shopping lists, pantry tracking, and nutrition totals. Works fully offline.",
+  "inLanguage": "en",
+  "isAccessibleForFree": true,
+  "author": { "@type": "Person", "name": "Syed Ahmed", "url": "https://syahmedu.github.io/nexus/" },
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+}
+</script>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23F17F3C'/><text x='16' y='23' text-anchor='middle' font-family='system-ui,sans-serif' font-weight='800' font-size='19' fill='white'>S</text></svg>">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+/* ── Accessibility (WCAG 2.2 AA) ── */
+a:focus-visible, button:focus-visible, input:focus-visible,
+textarea:focus-visible, select:focus-visible, [tabindex]:focus-visible, [role="button"]:focus-visible {
+  outline: 3px solid #9270F4; outline-offset: 2px; border-radius: 6px;
+}
+:focus:not(:focus-visible) { outline: none; }
+.skip-link {
+  position: fixed; top: 10px; left: 10px; z-index: 10000;
+  transform: translateY(-160%); transition: transform .2s ease;
+  background: #211B2E; color: #fff;
+  padding: 10px 16px; border-radius: 10px; font-weight: 700; text-decoration: none;
+  box-shadow: 0 8px 24px -14px rgba(0,0,0,.45);
+}
+.skip-link:focus { transform: translateY(0); outline: 3px solid #9270F4; outline-offset: 2px; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important; animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important; scroll-behavior: auto !important;
+  }
+}
+
 :root {
   --bg: #FFFBF5;
   --bg2: #FFF5E8;
@@ -588,6 +631,7 @@ html,body{ overflow-x:clip; }
 <script>document.addEventListener('DOMContentLoaded',function(){try{if(window.SyedAurora&&SyedAurora.mount({zIndex:-1,intensity:0.85}))document.body.classList.add('aurora-on');}catch(e){}});</script>
 </head>
 <body data-theme="light">
+<a class="skip-link" href="#main">Skip to content</a>
 <div class="syed-bar">
   <a class="syed-bar-logo" href="https://syahmedu.github.io/nexus/" target="_blank" rel="noopener"><span class="syed-mark">S</span><span class="syed-name">Syed</span></a>
   <span class="syed-divider"></span>
@@ -626,7 +670,7 @@ html,body{ overflow-x:clip; }
 </div>
 
 <!-- MAIN -->
-<main id="main">
+<main id="main" tabindex="-1">
 
   <!-- HOME -->
   <section id="sec-home" class="section active">
