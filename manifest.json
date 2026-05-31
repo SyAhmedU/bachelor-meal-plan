@@ -1,0 +1,14 @@
+{
+  "name": "Meal Planner — Halal Recipes",
+  "short_name": "Meal Planner",
+  "description": "200+ halal recipes with weekly planning, shopping lists, pantry tracking, and nutrition totals. Works offline.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#FBF7EF",
+  "theme_color": "#FBF7EF",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
