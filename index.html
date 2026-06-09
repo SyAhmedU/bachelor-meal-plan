@@ -152,6 +152,12 @@ body{display:flex;flex-direction:column;max-width:480px;margin:0 auto;min-height
 
 /* ── BOTTOM NAV ── */
 #bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--card);border-top:1px solid var(--border);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+#install-chip{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(72px + env(safe-area-inset-bottom) + 12px);z-index:99;display:none;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);box-shadow:0 12px 32px -12px rgba(0,0,0,.35);border-radius:999px;padding:7px 7px 7px 16px;max-width:calc(100% - 28px);font-size:13px;font-weight:600;color:var(--text,#0E0E18)}
+#install-chip.show{display:flex;animation:installPop .4s cubic-bezier(.22,1,.36,1)}
+@keyframes installPop{from{opacity:0;transform:translate(-50%,14px)}to{opacity:1;transform:translate(-50%,0)}}
+#install-chip .ic-add{background:var(--grad-warm,linear-gradient(135deg,#FF9656,#F14575 55%,#9270F4));color:#fff;border:none;border-radius:999px;padding:7px 14px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit}
+#install-chip .ic-x{background:none;border:none;color:var(--muted,#8C8498);cursor:pointer;font-size:16px;line-height:1;padding:4px 8px}
+@media (prefers-reduced-motion:reduce){#install-chip.show{animation:none}}
 #nav-indicator{position:absolute;top:0;height:2.5px;background:var(--accent);border-radius:0 0 3px 3px;transition:left .3s cubic-bezier(.34,1.56,.64,1),width .3s ease;pointer-events:none}
 .nav-btn{flex:1;border:none;background:none;padding:9px 4px 7px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--text3);font-size:10px;font-weight:600;transition:color .25s;position:relative}
 .nav-btn .nav-icon{font-size:21px;line-height:1;transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
@@ -778,6 +784,39 @@ html,body{ overflow-x:clip; }
 </main>
 
 <!-- BOTTOM NAV -->
+<!-- PWA install affordance (appears only when installable & not already installed) -->
+<div id="install-chip" role="dialog" aria-label="Install Meal Planner">
+  <span>📲 Install for offline use</span>
+  <button class="ic-add" id="install-add" type="button">Install</button>
+  <button class="ic-x" id="install-dismiss" type="button" aria-label="Dismiss">✕</button>
+</div>
+<script>
+(function(){
+  var chip=document.getElementById('install-chip'); if(!chip) return;
+  // Never offer when already running as an installed app.
+  if((window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone) return;
+  var deferred=null, dismissed=false;
+  try{ dismissed=localStorage.getItem('bmp_install_dismissed')==='1'; }catch(e){}
+  window.addEventListener('beforeinstallprompt', function(e){
+    e.preventDefault(); deferred=e;
+    if(!dismissed) chip.classList.add('show');
+  });
+  document.getElementById('install-add').addEventListener('click', function(){
+    chip.classList.remove('show');
+    if(!deferred) return;
+    deferred.prompt();
+    if(deferred.userChoice) deferred.userChoice.then(function(){ deferred=null; });
+  });
+  document.getElementById('install-dismiss').addEventListener('click', function(){
+    chip.classList.remove('show');
+    try{ localStorage.setItem('bmp_install_dismissed','1'); }catch(e){}
+  });
+  window.addEventListener('appinstalled', function(){
+    chip.classList.remove('show');
+    try{ localStorage.setItem('bmp_install_dismissed','1'); }catch(e){}
+  });
+})();
+</script>
 <nav id="bottom-nav">
   <div id="nav-indicator"></div>
   <button class="nav-btn active" data-sec="home" onclick="showSection('home')">
