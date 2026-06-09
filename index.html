@@ -599,9 +599,7 @@ body{display:flex;flex-direction:column;max-width:480px;margin:0 auto;min-height
 .today-serving-btn{background:var(--bg2)}
 .today-shop-build-btn{background:linear-gradient(135deg,#E86C3A,#C9920D)}
 
-/* ── 9. CONFETTI ── */
-@keyframes confettiFall{0%{transform:translateY(-10px) rotate(0deg);opacity:1}100%{transform:translateY(105vh) rotate(720deg);opacity:0}}
-.confetti-p{position:fixed;top:-10px;border-radius:2px;pointer-events:none;z-index:9999;animation:confettiFall linear forwards}
+/* ── 9. (confetti effect removed for a professional, calm feel) ── */
 
 /* ── 10. OVERNIGHT PREP CARD GLOW ── */
 @keyframes prepGlow{0%,100%{box-shadow:0 0 8px rgba(123,94,167,.15)}50%{box-shadow:0 0 22px rgba(123,94,167,.5),0 0 44px rgba(123,94,167,.1)}}
@@ -1447,7 +1445,6 @@ function markCooked(){
     .reduce((s,id)=>{ const x=(window.__MEALS__||[]).find(r=>r.id===id); return s+(x?x.protein:0); },0);
   renderProtein();
   renderTimeline();
-  if(prevTotal < STATE.proteinGoal && prevTotal+(m.protein||0) >= STATE.proteinGoal) fireConfetti();
 }
 
 // ── FRIDGE ──
@@ -2345,21 +2342,6 @@ function calcStreak(){
     if(streak > 60) break;
   }
   return streak;
-}
-
-function fireConfetti(){
-  const colors=['#E86C3A','#C9920D','#5C7A3E','#7B5EA7','#2A9D8F','#FFD700','#FF6B6B'];
-  for(let i=0;i<70;i++){
-    const p=document.createElement('div');
-    p.className='confetti-p';
-    const size=4+Math.random()*7;
-    p.style.cssText=`left:${Math.random()*100}vw;width:${size}px;height:${size}px;`+
-      `background:${colors[Math.floor(Math.random()*colors.length)]};`+
-      `animation-delay:${Math.random()*0.4}s;animation-duration:${0.9+Math.random()*1.1}s;`+
-      `border-radius:${Math.random()>0.5?'50%':'2px'};transform:rotate(${Math.random()*360}deg)`;
-    document.body.appendChild(p);
-    setTimeout(()=>p.remove(), 2000);
-  }
 }
 
 // Global ripple handler
