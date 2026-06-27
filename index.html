@@ -188,6 +188,94 @@ body::after{content:'';position:fixed;inset:0;z-index:9998;pointer-events:none;o
 .meal-chip:active{transform:scale(.95)}
 .meal-chip:hover{background:rgba(255,255,255,.28)}
 
+/* ── COOK HERO (home) ── */
+.home-greet{display:flex;align-items:baseline;gap:9px;padding:8px 2px 14px;flex-wrap:wrap}
+.hg-time{font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.7px}
+.hg-name{font-family:'Fraunces',serif;font-size:21px;font-weight:600;color:var(--text);letter-spacing:-.2px}
+.cook-hero{position:relative;border:1px solid var(--border);border-radius:24px;padding:24px 18px 18px;box-shadow:var(--shadow);overflow:hidden;
+  background:radial-gradient(130% 120% at 100% 0%, rgba(232,108,58,.12), transparent 58%),
+             radial-gradient(120% 120% at 0% 100%, rgba(201,146,13,.10), transparent 52%),
+             var(--card)}
+.cook-hero::before{content:'';position:absolute;inset:0;border-radius:24px;padding:1.5px;pointer-events:none;opacity:.55;
+  background:linear-gradient(135deg,rgba(232,108,58,.65),rgba(146,112,244,.4) 70%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.cook-spark{font-size:30px;line-height:1}
+.cook-title{font-family:'Fraunces',serif;font-size:27px;font-weight:600;letter-spacing:-.4px;color:var(--text);margin:8px 0 5px;text-wrap:balance;line-height:1.12}
+.cook-sub{font-size:13.5px;color:var(--text2);line-height:1.5;margin-bottom:15px;max-width:38ch}
+.cook-input-wrap{position:relative}
+.cook-input{width:100%;border:1.5px solid var(--border);border-radius:15px;background:var(--bg2);color:var(--text);font-family:inherit;font-size:16px;line-height:1.45;padding:13px 14px;resize:none;outline:none;transition:border-color .2s,box-shadow .2s,background .2s}
+.cook-input::placeholder{color:var(--text3)}
+.cook-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(232,108,58,.13);background:var(--card)}
+.cook-go{width:100%;margin-top:11px;border:none;border-radius:15px;padding:14px;font-size:15.5px;font-weight:800;color:#fff;cursor:pointer;letter-spacing:.2px;
+  background:linear-gradient(135deg,#E86C3A 0%,#C9920D 100%);box-shadow:0 8px 20px -9px rgba(232,108,58,.75);transition:filter .2s,transform .12s}
+.cook-go:hover{filter:brightness(1.05)}
+.cook-go:active{transform:scale(.985)}
+.cook-quick{margin-top:16px}
+.cook-quick-label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--text3)}
+.cook-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+.cook-chip{border:1px solid var(--border);background:var(--bg2);color:var(--text2);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;transition:background .18s,border-color .18s,color .18s;display:inline-flex;align-items:center;gap:5px}
+.cook-chip:hover{background:var(--bg3)}
+.cook-chip.on{background:rgba(232,108,58,.13);border-color:var(--accent);color:var(--accent2);font-weight:700}
+.cook-more-btn{margin-top:11px;background:none;border:none;color:var(--accent2);font-size:13px;font-weight:700;cursor:pointer;padding:2px 0}
+.cook-more-panel{display:none;margin-top:13px;border-top:1px dashed var(--border);padding-top:13px}
+.cook-more-panel.open{display:block}
+.cook-more-cat{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--text3);margin:10px 0 7px}
+.cook-more-cat:first-child{margin-top:0}
+
+/* cook results */
+.cook-results{margin-top:4px}
+.cook-results:empty{display:none}
+.cook-bucket{margin-top:20px}
+.cook-bucket-head{display:flex;align-items:center;gap:8px;margin-bottom:11px}
+.cbh-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.cook-bucket.now .cbh-dot{background:var(--olive)}
+.cook-bucket.almost .cbh-dot{background:var(--gold)}
+.cbh-title{font-size:14px;font-weight:800;color:var(--text)}
+.cbh-sub{font-size:12px;color:var(--text3);font-weight:600;margin-left:auto}
+.cook-result{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:15px;padding:11px 12px;margin-bottom:9px;cursor:pointer;transition:transform .12s,background .2s,border-color .2s;box-shadow:var(--shadow-card)}
+.cook-result:hover{background:var(--bg2);border-color:var(--accent)}
+.cook-result:active{transform:scale(.99)}
+.cr-emoji{font-size:27px;flex-shrink:0;width:48px;height:48px;border-radius:14px;background:var(--bg2);display:flex;align-items:center;justify-content:center}
+.cook-bucket.now .cr-emoji{background:rgba(92,122,62,.12)}
+.cr-info{flex:1;min-width:0}
+.cr-name{font-size:14px;font-weight:800;color:var(--text);line-height:1.25}
+.cr-meta{font-size:11.5px;color:var(--text3);margin-top:3px;display:flex;gap:9px;flex-wrap:wrap}
+.cr-miss{margin-top:7px;display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.cr-miss-lbl{font-size:10.5px;font-weight:700;color:var(--text3)}
+.cr-miss-chip{font-size:10.5px;font-weight:700;background:rgba(201,146,13,.15);color:var(--gold);border-radius:6px;padding:2px 8px}
+.cr-arrow{color:var(--text3);font-size:20px;flex-shrink:0;font-weight:300}
+.cook-empty{text-align:center;padding:28px 18px;color:var(--text3);background:var(--bg2);border-radius:18px;margin-top:16px;border:1px dashed var(--border)}
+.cook-empty-icon{font-size:38px;margin-bottom:10px}
+.cook-empty b{color:var(--text2);font-weight:700}
+
+/* cook AI */
+.cook-ai-cta{margin-top:20px;border:1.5px dashed var(--purple);background:rgba(123,94,167,.06);border-radius:18px;padding:17px 16px;text-align:center}
+.cook-ai-cta p{font-size:12.5px;color:var(--text2);margin-bottom:11px;line-height:1.5}
+.cook-ai-btn{border:none;border-radius:13px;padding:12px 20px;font-size:14px;font-weight:800;color:#fff;cursor:pointer;
+  background:linear-gradient(135deg,#9270F4,#7B5EA7);box-shadow:0 7px 18px -9px rgba(123,94,167,.85);transition:filter .2s,transform .12s}
+.cook-ai-btn:hover{filter:brightness(1.06)}
+.cook-ai-btn:active{transform:scale(.985)}
+.cook-ai-btn:disabled{opacity:.6;cursor:default;transform:none}
+.cook-ai-result{margin-top:15px;text-align:left;background:var(--card);border:1px solid var(--purple);border-radius:18px;overflow:hidden;box-shadow:var(--shadow-card)}
+.cai-head{background:linear-gradient(135deg,rgba(146,112,244,.16),rgba(123,94,167,.05));padding:15px 16px;border-bottom:1px solid var(--border)}
+.cai-badge{display:inline-block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#fff;background:linear-gradient(135deg,#9270F4,#7B5EA7);border-radius:7px;padding:3px 9px;margin-bottom:8px}
+.cai-name{font-family:'Fraunces',serif;font-size:20px;font-weight:600;color:var(--text);line-height:1.15}
+.cai-meta{font-size:12px;color:var(--text3);margin-top:4px;display:flex;gap:10px;flex-wrap:wrap}
+.cai-body{padding:15px 16px}
+.cai-sec-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);margin:0 0 9px}
+.cai-ing{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.cai-ing span{font-size:12.5px;background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:4px 10px;color:var(--text2)}
+.cai-steps{margin:0 0 4px;padding:0;list-style:none;display:flex;flex-direction:column;gap:11px}
+.cai-steps li{display:flex;gap:11px;font-size:14px;line-height:1.5;color:var(--text)}
+.cai-steps li>b{flex-shrink:0;width:23px;height:23px;background:var(--purple);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;margin-top:1px}
+.cai-tip{background:var(--bg2);border-left:3px solid var(--purple);border-radius:0 9px 9px 0;padding:10px 12px;font-size:12.5px;color:var(--text2);margin-top:12px;line-height:1.5}
+.cai-cook-btn{width:100%;margin-top:14px;border:none;border-radius:12px;padding:12px;font-size:14px;font-weight:800;color:#fff;cursor:pointer;background:var(--olive);transition:background .2s}
+.cai-cook-btn:hover{background:var(--olive2)}
+.cai-disc{font-size:11px;color:var(--text3);margin-top:13px;font-style:italic;line-height:1.45}
+.cook-ai-spinner{display:inline-block;width:16px;height:16px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:caiSpin .7s linear infinite;vertical-align:-3px;margin-right:8px}
+@keyframes caiSpin{to{transform:rotate(360deg)}}
+.home-day-head{font-family:'Fraunces',serif;font-size:18px;font-weight:600;color:var(--text);margin:28px 2px 13px;letter-spacing:-.2px}
+
 /* ── PROTEIN RING ── */
 .protein-ring-wrap{display:flex;align-items:center;gap:16px;margin-top:2px}
 .ring-svg-box{position:relative;width:88px;height:88px;flex-shrink:0}
@@ -712,17 +800,47 @@ mk();if(document.readyState==="loading")document.addEventListener("DOMContentLoa
 
   <!-- HOME -->
   <section id="sec-home" class="section active">
-    <div class="card greeting-card" id="greeting-card">
-      <div class="time-of-day" id="time-of-day">Good morning</div>
-      <h2 id="greeting-name">Syed! 👋</h2>
-      <div class="sub" id="greeting-sub">Let's fuel that 6ft frame right.</div>
-      <div class="suggest-label">Suggested now</div>
-      <div class="meal-suggest-chips" id="suggest-chips"></div>
+
+    <!-- slim greeting -->
+    <div class="home-greet">
+      <span class="hg-time" id="time-of-day">Good morning</span>
+      <span class="hg-name" id="greeting-name">Syed</span>
     </div>
+
+    <!-- COOK HERO -->
+    <div class="cook-hero" data-reveal>
+      <div class="cook-spark">🍳</div>
+      <h2 class="cook-title">What can you cook?</h2>
+      <p class="cook-sub">Tell me what's in your kitchen — I'll find recipes you can make right now.</p>
+      <div class="cook-input-wrap">
+        <textarea id="cook-input" class="cook-input" rows="2"
+          placeholder="tomato, onion, 2 eggs, rice…"
+          oninput="onCookInput()" onkeydown="cookKey(event)"
+          aria-label="Ingredients you have"></textarea>
+      </div>
+      <button class="cook-go" id="cook-go" onclick="runCookSearch()">🍳 Find what I can make</button>
+      <div class="cook-quick">
+        <span class="cook-quick-label">Quick add</span>
+        <div class="cook-chips" id="cook-quick-chips"></div>
+        <button class="cook-more-btn" id="cook-more-btn" onclick="toggleCookMore()">＋ Tap from a list</button>
+        <div class="cook-more-panel" id="cook-more-panel"></div>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div id="cook-results" class="cook-results"></div>
+
+    <!-- YOUR DAY (secondary dashboard) -->
+    <div class="home-day-head">Your day</div>
 
     <div class="card" id="protein-card">
       <div class="card-title">💪 Protein today</div>
       <div id="protein-ring-area"></div>
+    </div>
+
+    <div class="card greeting-card" id="suggest-card">
+      <div class="card-title" style="color:#fff;opacity:.92">✨ Suggested for now</div>
+      <div class="meal-suggest-chips" id="suggest-chips"></div>
     </div>
 
     <div class="card">
@@ -765,15 +883,6 @@ mk();if(document.readyState==="loading")document.addEventListener("DOMContentLoa
       <button class="meat-btn" data-meat="veg" onclick="setMeatFilter('veg')">🥦 Veg</button>
     </div>
     <div class="meal-grid" id="meal-grid"></div>
-  </section>
-
-  <!-- FRIDGE -->
-  <section id="sec-fridge" class="section">
-    <div class="section-heading">🧊 Fridge Checker</div>
-    <div class="fridge-intro">Tick what you have right now — I'll suggest meals you can cook tonight.</div>
-    <div id="fridge-cats"></div>
-    <button class="fridge-suggest-btn" onclick="suggestFromFridge()">✨ Show meals I can make</button>
-    <div class="fridge-results" id="fridge-results"></div>
   </section>
 
   <!-- PLANNER -->
@@ -849,9 +958,6 @@ mk();if(document.readyState==="loading")document.addEventListener("DOMContentLoa
   </button>
   <button class="nav-btn" data-sec="meals" onclick="showSection('meals')">
     <span class="nav-icon">🍽️</span>Meals
-  </button>
-  <button class="nav-btn" data-sec="fridge" onclick="showSection('fridge')">
-    <span class="nav-icon">🧊</span>Fridge
   </button>
   <button class="nav-btn" data-sec="plan" onclick="showSection('plan')">
     <span class="nav-icon">📆</span>Plan
@@ -1038,7 +1144,6 @@ function showSection(name){
   }
   if(name==='meals') renderMealGrid();
   if(name==='history') renderHistory('all');
-  if(name==='fridge') renderFridge();
   if(name==='plan'){ renderPlanner(); renderWeekNutrition(); renderTodaySlots(); }
   if(name==='home') renderHome();
 }
@@ -1059,8 +1164,10 @@ function initNavIndicator(){
 }
 
 // ── HOME ──
+let cookInited = false;
 function renderHome(){
   renderGreeting();
+  if(!cookInited){ initCook(); cookInited = true; }
   renderTimeline();
   renderProtein();
   renderTonightPrep();
@@ -1474,8 +1581,8 @@ function markCooked(){
   renderTimeline();
 }
 
-// ── FRIDGE ──
-const FRIDGE_CATS = [
+// ── COOK ENGINE (ingredients in a sentence → recipes) ──
+const COOK_CATS = [
   { label:'Proteins', items: ['Eggs','Chicken','Beef','Mutton','Paneer','Fish','Toor dal','Moong dal','Masoor dal','Chana dal','Chickpeas','Peanut butter'] },
   { label:'Veggies & Fruits', items: ['Onion','Tomato','Potato','Green chilli','Cauliflower','Bottle gourd','Brinjal','Green peas','Banana','Lemon juice','Coriander leaves','Curry leaves','Mint leaves'] },
   { label:'Dairy & Fats', items: ['Milk','Curd','Butter','Fresh coconut','Coconut milk'] },
@@ -1485,70 +1592,317 @@ const FRIDGE_CATS = [
 
 const FRIDGE_EMOJI = {
   'Eggs':'🥚','Chicken':'🍗','Beef':'🥩','Mutton':'🐑','Paneer':'🧀','Fish':'🐟','Toor dal':'🫘','Moong dal':'🫘','Masoor dal':'🫘','Chana dal':'🫘','Chickpeas':'🫘','Peanut butter':'🥜',
-  'Onion':'🧅','Tomato':'🍅','Potato':'🥔','Green chilli':'🌶️','Cauliflower':'🥦','Bottle gourd':'🥒','Brinjal':'🍆','Green peas':'🫘','Banana':'🍌','Lemon juice':'🍋','Coriander leaves':'🌿','Curry leaves':'🌿','Mint leaves':'🌿',
+  'Onion':'🧅','Tomato':'🍅','Potato':'🥔','Green chilli':'🌶️','Cauliflower':'🥦','Bottle gourd':'🥒','Brinjal':'🍆','Green peas':'🫘','Carrot':'🥕','Banana':'🍌','Lemon juice':'🍋','Coriander leaves':'🌿','Curry leaves':'🌿','Mint leaves':'🌿',
   'Milk':'🥛','Curd':'🫙','Butter':'🧈','Fresh coconut':'🥥','Coconut milk':'🥥',
   'Bread slices':'🍞','Rice':'🍚','Wheat atta':'🌾','Poha':'🌾','Oats':'🥣','Besan':'🌾','Dosa batter':'🫙','Semiya':'🍜','Roti':'🫓',
   'Sunflower oil':'🫚','Salt':'🧂','Turmeric':'🫙','Red chilli powder':'🌶️','Coriander powder':'🫙','Garam masala':'✨','Cumin seeds':'🌰','Mustard seeds':'🌰','Ginger-garlic paste':'🫙','Sambar powder':'🫙','Chicken masala':'🫙','Biryani masala':'🫙','Tamarind paste':'🫙','Ketchup':'🫙','Soy sauce':'🫙','Tea leaves':'🍵','Sugar':'🍬','Chaat masala':'🫙','Cashews':'🥜',
 };
 
-function renderFridge(){
-  const cont = document.getElementById('fridge-cats');
-  cont.innerHTML = '';
-  FRIDGE_CATS.forEach(cat=>{
-    const sec = document.createElement('div');
-    sec.className='card';
-    sec.innerHTML = `<div class="fridge-cat-title">${cat.label}</div><div class="fridge-grid" id="fg-${cat.label.replace(/\s/g,'')}"></div>`;
-    cont.appendChild(sec);
-    const grid = sec.querySelector('.fridge-grid');
-    cat.items.forEach(item=>{
-      const div = document.createElement('div');
-      div.className='fridge-item'+(STATE.fridge[item]?' checked':'');
-      div.innerHTML=`<div class="fridge-cb">${STATE.fridge[item]?'✓':''}</div>
-        <span class="fridge-emoji">${FRIDGE_EMOJI[item]||'🥄'}</span>
-        <span class="fridge-label">${item}</span>`;
-      div.onclick=()=>{
-        STATE.fridge[item]=!STATE.fridge[item];
-        save('fridge', STATE.fridge);
-        div.classList.toggle('checked', !!STATE.fridge[item]);
-        div.querySelector('.fridge-cb').textContent = STATE.fridge[item]?'✓':'';
-      };
-      grid.appendChild(div);
-    });
+// quick-add chips shown right under the input (the most common starting points)
+const COOK_QUICK = [
+  ['Eggs','🥚'],['Onion','🧅'],['Tomato','🍅'],['Potato','🥔'],['Rice','🍚'],
+  ['Chicken','🍗'],['Bread slices','🍞'],['Curd','🫙'],['Paneer','🧀'],['Oats','🥣'],
+];
+
+// staples a stocked kitchen always has — never block a "Cook now" on these,
+// and never treat them as the dish-defining ingredient.
+const COOK_STAPLE_RE = /\b(salt|water|oil|ghee|butter|sugar|jaggery|honey|pepper|turmeric|chilli|chili|coriander|cilantro|mint|curry leaf|curry leaves|cumin|jeera|mustard|fenugreek|methi|asafoetida|hing|garam masala|sambar powder|rasam powder|chaat masala|biryani masala|chicken masala|fish masala|meat masala|masala|ginger|garlic|baking|tea leaves|tea|vinegar|soy sauce|sauce|ketchup|tamarind|cardamom|clove|cinnamon|bay leaf|fennel|saunf|star anise|nutmeg|mace|kasuri|sesame|poppy|stock cube|corn ?flour|food colour|food color|essence|yeast|cornstarch)\b/;
+
+// synonym / Tamil / Urdu / Hindi → canonical token
+const COOK_ALIASES = {
+  egg:'egg', eggs:'egg', anda:'egg', ande:'egg', muttai:'egg', mutta:'egg',
+  onion:'onion', onions:'onion', pyaz:'onion', piaz:'onion', vengayam:'onion',
+  tomato:'tomato', tomatoes:'tomato', tamatar:'tomato', thakkali:'tomato',
+  potato:'potato', potatoes:'potato', aloo:'potato', urulai:'potato', urulaikizhangu:'potato',
+  rice:'rice', chawal:'rice', arisi:'rice', basmati:'rice',
+  chicken:'chicken', murgh:'chicken', murgi:'chicken', kozhi:'chicken',
+  paneer:'paneer',
+  curd:'curd', yogurt:'curd', yoghurt:'curd', dahi:'curd', thayir:'curd',
+  milk:'milk', doodh:'milk', paal:'milk',
+  bread:'bread', pav:'bread', 'double roti':'bread',
+  carrot:'carrot', carrots:'carrot', gajar:'carrot',
+  peas:'peas', matar:'peas', pattani:'peas',
+  cauliflower:'cauliflower', gobi:'cauliflower', 'phool gobi':'cauliflower',
+  cabbage:'cabbage', 'patta gobi':'cabbage', muttaikose:'cabbage',
+  brinjal:'brinjal', eggplant:'brinjal', aubergine:'brinjal', baingan:'brinjal', kathirikai:'brinjal',
+  capsicum:'capsicum', 'bell pepper':'capsicum', 'capsicum pepper':'capsicum',
+  beans:'beans', 'green beans':'beans',
+  'bottle gourd':'gourd', lauki:'gourd', sorakkai:'gourd', gourd:'gourd',
+  lemon:'lemon', lime:'lemon', nimbu:'lemon', elumichai:'lemon',
+  coconut:'coconut', nariyal:'coconut', thengai:'coconut',
+  oats:'oats', poha:'poha', aval:'poha', semiya:'semiya', vermicelli:'semiya',
+  besan:'besan', 'gram flour':'besan', atta:'atta', 'wheat flour':'atta', flour:'flour', maida:'maida',
+  beef:'beef', mutton:'mutton', lamb:'mutton', goat:'mutton', fish:'fish', prawn:'prawn', prawns:'prawn', shrimp:'prawn',
+  cheese:'cheese',
+  banana:'banana', kela:'banana', vazhaipazham:'banana',
+  mushroom:'mushroom', mushrooms:'mushroom',
+  cucumber:'cucumber', kheera:'cucumber',
+  spinach:'spinach', palak:'spinach', keerai:'spinach',
+  dal:'dal', daal:'dal', lentil:'dal', lentils:'dal', paruppu:'dal',
+  'toor dal':'dal', 'moong dal':'dal', 'masoor dal':'dal', 'chana dal':'dal',
+  chickpea:'chickpea', chickpeas:'chickpea', chana:'chickpea', chole:'chickpea', kabuli:'chickpea',
+  rajma:'rajma', 'kidney beans':'rajma',
+  peanut:'peanut', peanuts:'peanut', groundnut:'peanut', 'peanut butter':'peanut butter',
+  cashew:'cashew', cashews:'cashew',
+};
+
+// strip qualifiers / units / packaging words to bare ingredient
+function cookClean(s){
+  return (s||'').toLowerCase()
+    .replace(/\([^)]*\)/g,' ')
+    .replace(/[^a-z\s-]/g,' ')
+    .replace(/\b(small|large|medium|big|ripe|fresh|frozen|chopped|optional|loose|full-fat|fullfat|low-fat|skimmed|boiled|raw|cooked|leftover|powder|powdered|paste|crushed|grated|sliced|slices|slice|whole|of|the|a|an|some|few|little|bit|handful|cup|cups|tbsp|tsp|gram|grams|gm|kg|ml|litre|liter|nos|piece|pieces|pinch|clove|cloves|leaves|leaf)\b/g,' ')
+    .replace(/\s+/g,' ').trim();
+}
+// bare ingredient → canonical comparison token
+function cookCanon(raw){
+  const c = cookClean(raw);
+  if(!c) return '';
+  if(COOK_ALIASES[c]) return COOK_ALIASES[c];
+  const sing = c.replace(/s$/,'');
+  if(COOK_ALIASES[sing]) return COOK_ALIASES[sing];
+  // if a multi-word name contains a known alias word, use it (e.g. "ripe red tomato")
+  for(const w of c.split(' ')){ if(COOK_ALIASES[w]) return COOK_ALIASES[w]; }
+  return sing || c;
+}
+function cookIsStaple(rawName){ return COOK_STAPLE_RE.test((rawName||'').toLowerCase()); }
+
+// parse the textarea into canonical tokens the user "has"
+function cookParseInput(){
+  const text = (document.getElementById('cook-input')||{}).value || '';
+  const parts = text.split(/[,\n;]+|\b(?:and|with|plus)\b/i);
+  const seen = new Set(); const toks = [];
+  parts.forEach(p=>{
+    const canon = cookCanon(p);
+    if(canon && !cookIsStaple(p) && !seen.has(canon)){ seen.add(canon); toks.push(canon); }
   });
-  document.getElementById('fridge-results').innerHTML='';
+  return toks;
 }
 
-function suggestFromFridge(){
-  const have = Object.entries(STATE.fridge).filter(([,v])=>v).map(([k])=>k.toLowerCase());
-  const meals = (window.__MEALS__||[]);
-  const scored = meals.map(m=>{
-    const names = (m.ingredients||[]).map(i=>i.name.toLowerCase());
-    const matched = names.filter(n=>have.some(h=>n.includes(h)||h.includes(n)));
-    return {m, score: names.length ? matched.length/names.length : 0, matched: matched.length, total: names.length};
-  }).filter(x=>x.score>0).sort((a,b)=>b.score-a.score).slice(0,6);
+// the dish-defining (non-staple) ingredients of a meal, deduped by canon
+function cookMealCores(m){
+  const out = []; const seen = new Set();
+  (m.ingredients||[]).forEach(ing=>{
+    if(cookIsStaple(ing.name)) return;
+    const canon = cookCanon(ing.name);
+    if(!canon || seen.has(canon)) return;
+    seen.add(canon);
+    out.push({ canon, name: cookClean(ing.name) || ing.name.toLowerCase(), emoji: ing.emoji });
+  });
+  return out;
+}
+function cookHaveMatch(coreCanon, haveSet){
+  if(haveSet.has(coreCanon)) return true;
+  for(const h of haveSet){
+    if(h.length>=4 && coreCanon.length>=4 && (h.includes(coreCanon)||coreCanon.includes(h))) return true;
+  }
+  return false;
+}
 
-  const res = document.getElementById('fridge-results');
-  if(!scored.length){
-    res.innerHTML='<div class="empty-state"><div class="empty-icon">🧊</div>Tick some ingredients above to see suggestions!</div>';
+function runCookSearch(){
+  const have = cookParseInput();
+  const res = document.getElementById('cook-results');
+  if(!have.length){
+    res.innerHTML = `<div class="cook-empty"><div class="cook-empty-icon">🥗</div>
+      Tell me what you've got — type or tap a few ingredients like <b>tomato, onion, eggs</b>.</div>`;
+    res.scrollIntoView({behavior:'smooth', block:'nearest'});
     return;
   }
-  res.innerHTML='<div class="card-title" style="margin-bottom:8px">🍳 You can make these:</div>';
-  scored.forEach(({m, matched, total})=>{
-    const div = document.createElement('div');
-    div.className='meal-card';
-    div.style.marginBottom='8px';
-    div.innerHTML=`<div class="meal-card-emoji">${m.emoji}</div>
-      <div class="meal-card-info">
-        <div class="meal-card-name">${m.name}</div>
-        <div class="meal-card-sub">${matched}/${total} ingredients on hand</div>
-        <div class="meal-card-badges">
-          <span class="badge badge-effort-${m.effort}">${capitalize(m.effort)}</span>
-          <span class="badge badge-time">⏱ ${m.time}min</span>
-        </div>
-      </div>`;
-    div.onclick=()=>openRecipe(m.id);
-    res.appendChild(div);
+  const haveSet = new Set(have);
+  const now = [], almost = [];
+  (window.__MEALS__||[]).forEach(m=>{
+    const cores = cookMealCores(m);
+    if(!cores.length) return;
+    const missing = []; let matched = 0; const usedHave = new Set();
+    cores.forEach(c=>{
+      if(cookHaveMatch(c.canon, haveSet)){ matched++; usedHave.add(c.canon); }
+      else missing.push(c);
+    });
+    if(!usedHave.size) return;                 // recipe must use ≥1 thing they typed
+    const row = { m, missing, matched, total: cores.length, used: usedHave.size };
+    if(missing.length===0) now.push(row);
+    else if(missing.length<=2) almost.push(row);
   });
+  now.sort((a,b)=> b.used-a.used || a.total-b.total || a.m.time-b.m.time);
+  almost.sort((a,b)=> a.missing.length-b.missing.length || b.used-a.used || a.m.time-b.m.time);
+
+  renderCookResults(now.slice(0,8), almost.slice(0,6), have);
+}
+
+function cookRowHTML(row, showMiss){
+  const m = row.m;
+  const miss = showMiss && row.missing.length
+    ? `<div class="cr-miss"><span class="cr-miss-lbl">need</span>${
+        row.missing.map(x=>`<span class="cr-miss-chip">${x.emoji?x.emoji+' ':''}${x.name}</span>`).join('')}</div>`
+    : '';
+  return `<div class="cook-result" onclick="openRecipe('${m.id}')">
+    <div class="cr-emoji">${m.emoji}</div>
+    <div class="cr-info">
+      <div class="cr-name">${m.name}</div>
+      <div class="cr-meta"><span>⏱ ${m.time} min</span><span>💪 ${m.protein}g</span><span>${capitalize(m.effort)}</span></div>
+      ${miss}
+    </div>
+    <div class="cr-arrow">›</div>
+  </div>`;
+}
+
+function renderCookResults(now, almost, have){
+  const res = document.getElementById('cook-results');
+  let html = '';
+  if(now.length){
+    html += `<div class="cook-bucket now"><div class="cook-bucket-head">
+      <span class="cbh-dot"></span><span class="cbh-title">Cook now</span>
+      <span class="cbh-sub">you've got everything</span></div>
+      ${now.map(r=>cookRowHTML(r,false)).join('')}</div>`;
+  }
+  if(almost.length){
+    html += `<div class="cook-bucket almost"><div class="cook-bucket-head">
+      <span class="cbh-dot"></span><span class="cbh-title">Almost there</span>
+      <span class="cbh-sub">grab 1–2 more</span></div>
+      ${almost.map(r=>cookRowHTML(r,true)).join('')}</div>`;
+  }
+  if(!now.length && !almost.length){
+    html += `<div class="cook-empty"><div class="cook-empty-icon">🤔</div>
+      Nothing in your recipe book matches that exactly.<br>Let AI improvise something for you 👇</div>`;
+  }
+  // AI improvise CTA — always offered (graceful when offline)
+  html += `<div class="cook-ai-cta">
+    <p>Want something new? AI can invent a quick halal recipe from just what you have.</p>
+    <button class="cook-ai-btn" id="cook-ai-btn" onclick="cookAskAI()">✨ Invent something new</button>
+    <div id="cook-ai-result"></div>
+  </div>`;
+  res.innerHTML = html;
+  res.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+// ── quick-add chips + tap-from-a-list ──
+function initCook(){
+  // restore last input
+  const saved = load('cookInput', '');
+  const inp = document.getElementById('cook-input');
+  if(inp && saved) inp.value = saved;
+  // rotating placeholder examples
+  const examples = ['tomato, onion, 2 eggs, rice…','potato, green chilli, curd…','chicken, onion, tomato…','oats, banana, milk…','paneer, capsicum, onion…','leftover rice, egg, carrot…'];
+  if(inp) inp.setAttribute('placeholder', examples[Math.floor(Math.random()*examples.length)]);
+  // quick chips
+  const qc = document.getElementById('cook-quick-chips');
+  if(qc){
+    qc.innerHTML = COOK_QUICK.map(([name,em])=>
+      `<button type="button" class="cook-chip" data-ing="${name}" onclick="cookToggleIng('${name}')">${em} ${name.replace(' slices','')}</button>`).join('');
+  }
+  // tap-from-a-list panel
+  const panel = document.getElementById('cook-more-panel');
+  if(panel){
+    panel.innerHTML = COOK_CATS.map(cat=>
+      `<div class="cook-more-cat">${cat.label}</div><div class="cook-chips">${
+        cat.items.map(it=>`<button type="button" class="cook-chip" data-ing="${it}" onclick="cookToggleIng('${it.replace(/'/g,"\\'")}')">${FRIDGE_EMOJI[it]||'🥄'} ${it}</button>`).join('')
+      }</div>`).join('');
+  }
+  refreshCookChips();
+}
+function onCookInput(){
+  save('cookInput', (document.getElementById('cook-input')||{}).value||'');
+  refreshCookChips();
+}
+function cookKey(e){
+  if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); runCookSearch(); }
+}
+function toggleCookMore(){
+  const panel = document.getElementById('cook-more-panel');
+  const btn = document.getElementById('cook-more-btn');
+  const open = panel.classList.toggle('open');
+  btn.textContent = open ? '－ Hide list' : '＋ Tap from a list';
+}
+// add/remove an ingredient token in the textarea (single source of truth)
+function cookToggleIng(name){
+  const inp = document.getElementById('cook-input');
+  const canon = cookCanon(name);
+  const parts = inp.value.split(/,\n?/).map(s=>s.trim()).filter(Boolean);
+  const idx = parts.findIndex(p=>cookCanon(p)===canon);
+  if(idx>=0) parts.splice(idx,1);
+  else parts.push(name.replace(' slices',''));
+  inp.value = parts.join(', ');
+  onCookInput();
+}
+function refreshCookChips(){
+  const have = new Set(cookParseInput());
+  document.querySelectorAll('.cook-chip[data-ing]').forEach(ch=>{
+    ch.classList.toggle('on', have.has(cookCanon(ch.dataset.ing)));
+  });
+}
+
+// ── AI: invent a recipe from what they have ──
+const COOK_AI_ENDPOINT = (location.hostname.endsWith('vercel.app'))
+  ? '/api/cook'
+  : 'https://bachelor-meal-plan.vercel.app/api/cook';
+let cookAILast = '';
+function cookAskAI(){
+  const have = cookParseInput();
+  const btn = document.getElementById('cook-ai-btn');
+  const out = document.getElementById('cook-ai-result');
+  if(!have.length){
+    out.innerHTML = `<div class="cai-disc" style="margin-top:12px">Add a few ingredients first, then let AI improvise.</div>`;
+    return;
+  }
+  if(!navigator.onLine){
+    out.innerHTML = `<div class="cai-disc" style="margin-top:12px">📴 You're offline. The matches above work without internet — reconnect to let AI invent a brand-new recipe.</div>`;
+    return;
+  }
+  const ingredients = have.join(', ');
+  btn.disabled = true;
+  btn.innerHTML = `<span class="cook-ai-spinner"></span>Improvising…`;
+  out.innerHTML = '';
+  fetch(COOK_AI_ENDPOINT, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ ingredients })
+  })
+  .then(r=> r.ok ? r.json() : r.json().then(j=>Promise.reject(j)))
+  .then(data=>{
+    if(!data || !data.recipe) throw new Error('no recipe');
+    renderAIRecipe(data.recipe);
+  })
+  .catch(err=>{
+    const msg = (err && err.error) ? err.error : 'Could not reach the AI right now. The matches above still work — try again in a moment.';
+    out.innerHTML = `<div class="cai-disc" style="margin-top:12px">⚠️ ${msg}</div>`;
+  })
+  .finally(()=>{ btn.disabled=false; btn.textContent='✨ Invent another'; });
+}
+function renderAIRecipe(r){
+  const out = document.getElementById('cook-ai-result');
+  const ings = (r.ingredients||[]).map(i=>{
+    const q = (i.qty!=null && i.qty!=='') ? ` · ${i.qty}` : '';
+    return `<span>${i.emoji?i.emoji+' ':''}${i.name||i}${q}</span>`;
+  }).join('');
+  const steps = (r.steps||[]).map((s,i)=>`<li><b>${i+1}</b><span>${typeof s==='string'?s:(s.text||'')}</span></li>`).join('');
+  out.innerHTML = `<div class="cook-ai-result">
+    <div class="cai-head">
+      <span class="cai-badge">✨ AI idea</span>
+      <div class="cai-name">${r.emoji?r.emoji+' ':''}${r.name||'Quick recipe'}</div>
+      <div class="cai-meta">${r.time?`<span>⏱ ${r.time} min</span>`:''}${r.effort?`<span>${capitalize(r.effort)}</span>`:''}${r.serves?`<span>🍽 serves ${r.serves}</span>`:''}</div>
+    </div>
+    <div class="cai-body">
+      ${ings?`<div class="cai-sec-title">You'll use</div><div class="cai-ing">${ings}</div>`:''}
+      <div class="cai-sec-title">Steps</div>
+      <ul class="cai-steps">${steps}</ul>
+      ${r.tip?`<div class="cai-tip">💡 ${r.tip}</div>`:''}
+      ${(r.steps&&r.steps.length)?`<button class="cai-cook-btn" onclick="cookAIRecipe()">🍳 Cook this step-by-step</button>`:''}
+      <div class="cai-disc">⚠️ AI-generated and not kitchen-tested — read it through, trust your own taste, and double-check anything that looks off. Quantities are approximate.</div>
+    </div>
+  </div>`;
+  // stash for cooking mode
+  cookAILast = JSON.stringify(r);
+  out.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+function cookAIRecipe(){
+  let r; try{ r = JSON.parse(cookAILast); }catch(e){ return; }
+  STATE.currentMeal = {
+    id:'ai-'+Date.now(), emoji:r.emoji||'✨', name:r.name||'AI recipe', type:'dinner',
+    effort:r.effort||'simple', time:r.time||15, protein:r.protein||0, calories:r.calories||0,
+    ingredients:(r.ingredients||[]).map(i=> typeof i==='string'?{name:i}:{emoji:i.emoji,name:i.name,qty:i.qty,unit:''}),
+    steps:(r.steps||[]).map(s=>({text: typeof s==='string'?s:(s.text||''), timer:0})),
+    tip:r.tip||'', nightPrep:null
+  };
+  startCookingMode();
 }
 
 // ── PLANNER ──
