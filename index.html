@@ -1513,20 +1513,28 @@ function startTimer(stepIdx, seconds){
     return;
   }
 
-  let remaining = seconds;
+  // Wall-clock based: store an absolute deadline so the timer stays accurate
+  // even if the tab is minimized/backgrounded (where setInterval is throttled).
   btn.className='step-timer-btn running';
-  const interval = setInterval(()=>{
-    remaining--;
-    display.textContent = formatTimer(remaining);
+  const tick = ()=>{
+    const t = activeTimers[stepIdx];
+    if(!t) return;
+    const d = document.getElementById('timer-display-'+stepIdx);
+    const b = document.getElementById('timer-btn-'+stepIdx);
+    const remaining = Math.max(0, Math.round((t.endAt - Date.now())/1000));
     if(remaining<=0){
-      clearInterval(interval);
+      clearInterval(t.interval);
       delete activeTimers[stepIdx];
-      btn.className='step-timer-btn';
-      display.textContent = '✅ Done!';
+      if(b) b.className='step-timer-btn';
+      if(d) d.textContent = '✅ Done!';
       if('vibrate' in navigator) navigator.vibrate([200,100,200]);
+    } else if(d){
+      d.textContent = formatTimer(remaining);
     }
-  },1000);
-  activeTimers[stepIdx] = {interval, seconds};
+  };
+  const interval = setInterval(tick, 250);
+  activeTimers[stepIdx] = {interval, seconds, endAt: Date.now() + seconds*1000, tick};
+  tick();
 }
 
 function formatTimer(s){
@@ -2771,7 +2779,7 @@ function init(){
 document.addEventListener('DOMContentLoaded', init);
 
 // ── COOKING MODE ──
-let CM = { stepIdx: 0, meal: null, timerRemaining: 0, timerOriginal: 0, timerInterval: null, timerRunning: false, wakeLock: null };
+let CM = { stepIdx: 0, meal: null, timerRemaining: 0, timerOriginal: 0, timerInterval: null, timerRunning: false, timerEndAt: 0, wakeLock: null };
 
 async function requestWakeLock(){
   if('wakeLock' in navigator){
@@ -2782,9 +2790,15 @@ function releaseWakeLock(){
   if(CM.wakeLock){ CM.wakeLock.release().catch(()=>{}); CM.wakeLock = null; }
 }
 document.addEventListener('visibilitychange', ()=>{
-  if(document.visibilityState==='visible' && document.getElementById('cooking-overlay').classList.contains('open')){
+  if(document.visibilityState!=='visible') return;
+  // Coming back to the foreground: re-acquire the screen wake lock (it's auto-released
+  // when hidden) and re-sync every running timer to wall-clock — so a timer that ran
+  // out while the app was minimized lands on "Done" (with beep/buzz) the moment we return.
+  if(document.getElementById('cooking-overlay').classList.contains('open')){
     requestWakeLock();
   }
+  if(CM.timerRunning) tickCookTimer();
+  Object.values(activeTimers).forEach(t=>{ if(t && t.tick) t.tick(); });
 });
 
 function playCookBeep(){
@@ -2884,28 +2898,46 @@ function cookStep(dir){
 
 function toggleCookTimer(){
   if(CM.timerRunning){
+    // Pause — snapshot the remaining time from the deadline before stopping.
+    CM.timerRemaining = Math.max(0, Math.round((CM.timerEndAt - Date.now())/1000));
     stopCookTimer();
+    updateCookTimerDisplay();
     document.getElementById('cm-timer-circle').className = 'cook-timer-circle';
     document.getElementById('cm-timer-label').textContent = 'tap to resume';
   } else {
+    if(CM.timerRemaining <= 0) return;
+    // Wall-clock based: pin an absolute deadline so the countdown stays correct
+    // even while minimized/backgrounded (where setInterval is throttled or frozen).
     CM.timerRunning = true;
+    CM.timerEndAt = Date.now() + CM.timerRemaining*1000;
     document.getElementById('cm-timer-circle').className = 'cook-timer-circle running';
     document.getElementById('cm-timer-label').textContent = 'tap to pause';
-    CM.timerInterval = setInterval(()=>{
-      CM.timerRemaining--;
-      updateCookTimerDisplay();
-      if(CM.timerRemaining <= 0){
-        stopCookTimer();
-        playCookBeep();
-        if('vibrate' in navigator) navigator.vibrate([300,100,300,100,300]);
-        const circle = document.getElementById('cm-timer-circle');
-        circle.className = 'cook-timer-circle done-flash';
-        document.getElementById('cm-timer-time').textContent = '✅';
-        document.getElementById('cm-timer-label').textContent = 'Done!';
-        document.getElementById('cm-timer-tap').textContent = 'Timer finished — go to next step';
-      }
-    }, 1000);
+    CM.timerInterval = setInterval(tickCookTimer, 250);
+    tickCookTimer();
   }
+}
+
+function tickCookTimer(){
+  if(!CM.timerRunning) return;
+  const remaining = Math.max(0, Math.round((CM.timerEndAt - Date.now())/1000));
+  CM.timerRemaining = remaining;
+  if(remaining <= 0){
+    cookTimerDone();
+  } else {
+    updateCookTimerDisplay();
+  }
+}
+
+function cookTimerDone(){
+  stopCookTimer();
+  CM.timerRemaining = 0;
+  playCookBeep();
+  if('vibrate' in navigator) navigator.vibrate([300,100,300,100,300]);
+  const circle = document.getElementById('cm-timer-circle');
+  circle.className = 'cook-timer-circle done-flash';
+  document.getElementById('cm-timer-time').textContent = '✅';
+  document.getElementById('cm-timer-label').textContent = 'Done!';
+  document.getElementById('cm-timer-tap').textContent = 'Timer finished — go to next step';
 }
 
 function stopCookTimer(){
