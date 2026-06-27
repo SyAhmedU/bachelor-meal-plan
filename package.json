@@ -1,0 +1,10 @@
+{
+  "name": "bachelor-meal-plan",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Halal meal app — type what's in your kitchen and it matches 200+ recipes offline, or AI invents a fresh one.",
+  "scripts": {
+    "dev": "vercel dev"
+  }
+}

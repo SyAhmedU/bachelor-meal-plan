@@ -456,19 +456,8 @@ body::after{content:'';position:fixed;inset:0;z-index:9998;pointer-events:none;o
 .cook-ingredients-body{display:none;margin-top:8px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px}
 .cook-ingredients-body.open{display:block}
 
-/* ── FRIDGE CHECKER ── */
-.fridge-intro{font-size:13px;color:var(--text3);margin-bottom:14px}
-.fridge-cats{display:flex;flex-direction:column;gap:12px}
-.fridge-cat-title{font-size:13px;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px}
-.fridge-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.fridge-item{display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:8px 10px;cursor:pointer;transition:background .2s}
-.fridge-item.checked{background:rgba(92,122,62,.10);border-color:var(--olive)}
-.fridge-cb{width:18px;height:18px;border:2px solid var(--border);border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .2s}
-.fridge-item.checked .fridge-cb{background:var(--olive);border-color:var(--olive);color:#fff}
-.fridge-label{font-size:13px;color:var(--text);font-weight:500}
-.fridge-emoji{font-size:18px}
+/* ── shared suggest button (planner / history "make today") ── */
 .fridge-suggest-btn{width:100%;margin-top:16px;background:var(--accent);color:#fff;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:700;cursor:pointer}
-.fridge-results{margin-top:16px}
 
 /* ── PLANNER ── */
 .week-grid{display:flex;flex-direction:column;gap:10px}
@@ -1087,7 +1076,6 @@ let STATE = {
   history: [],
   ratings: {},
   plan: {},
-  fridge: {},
   todayLog: {},
   nightPrepDone: {},
   theme: 'light',
@@ -1103,7 +1091,6 @@ function loadState(){
   STATE.history = load('history', []);
   STATE.ratings = load('ratings', {});
   STATE.plan    = load('plan', {});
-  STATE.fridge  = load('fridge', {});
   STATE.todayLog      = load('todayLog_'+todayKey(), {});
   STATE.nightPrepDone = load('prepDone_'+tomorrowKey(), {});
   STATE.theme         = load('theme', 'light');
