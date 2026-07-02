@@ -1173,6 +1173,13 @@ function renderGreeting(){
   chips.innerHTML = '';
   let typeMap = {morning:'breakfast', afternoon:'snack', evening:'dinner', night:'dinner'};
   let type = typeMap[greeting] || 'breakfast';
+  // "Tonight?" one-tap: time-of-day type + variety (skips the last 7 days' repeats)
+  const tb = document.createElement('button');
+  tb.className='meal-chip';
+  tb.style.cssText='background:linear-gradient(135deg,#FF9656,#F14575);color:#fff;font-weight:700';
+  tb.textContent='✨ '+(type==='dinner'?'Tonight?':type==='breakfast'?'This morning?':'Right now?');
+  tb.onclick=()=>tonightPick(type);
+  chips.appendChild(tb);
   const pool = (window.__MEALS__||[]).filter(m=>m.type===type).slice(0,4);
   pool.forEach(m=>{
     const c = document.createElement('button');
@@ -1181,6 +1188,61 @@ function renderGreeting(){
     c.onclick = ()=>openRecipe(m.id);
     chips.appendChild(c);
   });
+  renderLeftoverIdeas();
+}
+
+// One-tap pick: right meal type for the hour, prefers dishes NOT cooked in the
+// last 7 days (variety from your real History), leans quick on weeknights.
+function tonightPick(type){
+  const meals = (window.__MEALS__||[]).filter(m=>m.type===type);
+  if(!meals.length) return;
+  const weekAgo = Date.now() - 7*86400000;
+  const recent = new Set((STATE.history||[]).filter(h=>new Date(h.ts).getTime()>weekAgo).map(h=>h.id));
+  let pool = meals.filter(m=>!recent.has(m.id) && STATE.ratings[m.id]!=='dislike');
+  if(!pool.length) pool = meals;
+  const hour = new Date().getHours();
+  if(hour>=19){ const quick = pool.filter(m=>m.time<=25); if(quick.length>=3) pool = quick; }
+  const liked = pool.filter(m=>STATE.ratings[m.id]==='like');
+  if(liked.length>=2) pool = liked;
+  openRecipe(pool[Math.floor(Math.random()*pool.length)].id);
+}
+
+// Leftover chaining: yesterday's cooked dishes → today's meals that reuse the
+// same core ingredient (rice → fried rice, chicken → chicken roll…). Purely
+// from your own History + each recipe's real ingredient list.
+function renderLeftoverIdeas(){
+  let host = document.getElementById('leftover-ideas');
+  if(!host){
+    const anchor = document.getElementById('tonight-card') || document.getElementById('suggest-chips');
+    if(!anchor) return;
+    host = document.createElement('div');
+    host.id = 'leftover-ideas';
+    anchor.parentNode.insertBefore(host, anchor);
+  }
+  const y = new Date(); y.setDate(y.getDate()-1);
+  const yk = y.getFullYear()+'-'+(y.getMonth()+1)+'-'+y.getDate();
+  const yesterMeals = (STATE.history||[]).filter(h=>{
+    const d = new Date(h.ts);
+    return (d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate())===yk;
+  }).map(h=>(window.__MEALS__||[]).find(m=>m.id===h.id)).filter(Boolean);
+  if(!yesterMeals.length){ host.innerHTML=''; return; }
+  const CHAIN_CORES = ['rice','chicken','dal','chickpea','paneer','potato','beef','mutton','fish','roti','bread'];
+  const yCores = new Set();
+  yesterMeals.forEach(m=>cookMealCores(m).forEach(c=>{ if(CHAIN_CORES.includes(c.canon)) yCores.add(c.canon); }));
+  if(!yCores.size){ host.innerHTML=''; return; }
+  const yesterIds = new Set(yesterMeals.map(m=>m.id));
+  const ideas = [];
+  for(const m of (window.__MEALS__||[])){
+    if(yesterIds.has(m.id) || ideas.length>=3) continue;
+    const sharedCore = cookMealCores(m).find(c=>yCores.has(c.canon));
+    if(sharedCore) ideas.push({m, shared: sharedCore.canon});
+  }
+  if(!ideas.length){ host.innerHTML=''; return; }
+  host.innerHTML = `<div style="background:var(--card,#fff);border-radius:16px;padding:14px 16px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.06)">
+    <div style="font-weight:700;font-size:14px;margin-bottom:8px">♻ Use up yesterday's base</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">${ideas.map(({m,shared})=>`
+      <button class="meal-chip" onclick="openRecipe('${m.id}')" title="Shares ${shared} with what you cooked yesterday">${m.emoji} ${m.name.split(' + ')[0]} <span style="opacity:.65;font-size:11px">· ${shared}</span></button>`).join('')}</div>
+  </div>`;
 }
 
 function renderTimeline(){
@@ -1275,6 +1337,20 @@ function renderTonightPrep(){
   const tomorrowPlan = STATE.plan[tk] || {};
   const meals = window.__MEALS__ || [];
 
+  // opt-in 9 pm nudge toggle (in-app while open — said honestly on the label)
+  let remBtn = document.getElementById('prep-reminder-btn');
+  if(!remBtn){
+    const card = document.getElementById('tonight-card');
+    if(card){
+      remBtn = document.createElement('button');
+      remBtn.id = 'prep-reminder-btn';
+      remBtn.style.cssText='font:inherit;font-size:11.5px;border:1px solid var(--border,#ddd);background:none;color:var(--text-secondary,#777);border-radius:999px;padding:4px 11px;cursor:pointer;margin:6px 0 2px';
+      remBtn.onclick = togglePrepReminder;
+      card.appendChild(remBtn);
+    }
+  }
+  if(remBtn) remBtn.textContent = load('prepReminder', false) ? '🔔 9 pm nudge ON (while app is open) — tap to turn off' : '🔕 Remind me at 9 pm (works while app is open)';
+
   if(!Object.keys(tomorrowPlan).length){
     list.innerHTML = '<li class="prep-empty">No meals planned for tomorrow. <span class="prep-plan-link" onclick="showSection(\'plan\')">Open Planner →</span></li>';
     return;
@@ -1310,6 +1386,46 @@ function togglePrepDone(id){
   STATE.nightPrepDone[id] = !STATE.nightPrepDone[id];
   save('prepDone_'+tomorrowKey(), STATE.nightPrepDone);
   renderTonightPrep();
+}
+
+// Cost-per-meal: strictly the user's own number — never estimated, never scraped.
+function setMealCost(id){
+  const costs = load('costs', {});
+  const cur = costs[id] > 0 ? costs[id] : '';
+  const raw = prompt('What does this meal cost you to make (₹)? Your own number — leave blank to remove.', cur);
+  if(raw === null) return;
+  const v = parseInt(String(raw).replace(/[^0-9]/g,''), 10);
+  if(v > 0) costs[id] = v; else delete costs[id];
+  save('costs', costs);
+  openRecipe(id);
+}
+
+// ── Night-prep reminder (opt-in, honest scope) ──────────────────────
+// Browser notifications without a push server only fire while the app is open,
+// so this is an in-app 9 pm nudge — said plainly on the toggle.
+function togglePrepReminder(){
+  const on = load('prepReminder', false);
+  if(on){ save('prepReminder', false); renderTonightPrep(); return; }
+  if(!('Notification' in window)){ alert('This browser does not support notifications.'); return; }
+  Notification.requestPermission().then(p=>{
+    if(p==='granted'){ save('prepReminder', true); schedulePrepReminder(); }
+    renderTonightPrep();
+  });
+}
+function schedulePrepReminder(){
+  if(!load('prepReminder', false) || !('Notification' in window) || Notification.permission!=='granted') return;
+  const now = new Date();
+  const at9 = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 21, 0, 0);
+  if(at9 <= now) return; // past 9 pm — tomorrow's app open will schedule the next one
+  clearTimeout(window._prepReminderT);
+  window._prepReminderT = setTimeout(()=>{
+    const tk = tomorrowKey();
+    const plan = STATE.plan[tk] || {};
+    const preps = Object.values(plan).map(id=>(window.__MEALS__||[]).find(m=>m.id===id)).filter(m=>m&&m.nightPrep);
+    if(preps.length){
+      try{ new Notification('🌙 Night prep for tomorrow', { body: preps.map(m=>m.emoji+' '+m.name.split(' + ')[0]).join(' · '), icon: 'icon.svg' }); }catch(e){}
+    }
+  }, at9 - now);
 }
 
 // ── MEAL BROWSER ──
@@ -1403,12 +1519,22 @@ function openRecipe(id){
 
   document.getElementById('ro-emoji').textContent = m.emoji;
   document.getElementById('ro-name').textContent = m.name;
-  document.getElementById('ro-name-ta').textContent = [m.nameTA, m.nameUR].filter(Boolean).join(' · ');
+  const taEl = document.getElementById('ro-name-ta');
+  taEl.textContent = [m.nameTA, m.nameUR].filter(Boolean).join(' · ');
+  // Big-type native-name mode: makes the Tamil/Urdu name the visual anchor —
+  // for cooking with family who read those scripts first. Persisted toggle.
+  const bigOn = load('bignames', false);
+  taEl.style.cssText = bigOn && (m.nameTA||m.nameUR) ? 'font-size:26px;line-height:1.35;font-weight:700;color:var(--text,#222)' : '';
+  taEl.title = 'Tap to toggle big-type Tamil/Urdu names';
+  taEl.style.cursor='pointer';
+  taEl.onclick = ()=>{ save('bignames', !load('bignames', false)); openRecipe(m.id); };
+  const costs = load('costs', {});
   document.getElementById('ro-meta').innerHTML = `
     <span class="badge badge-effort-${m.effort}">${capitalize(m.effort)}</span>
     <span class="badge badge-time">⏱ ${m.time}min</span>
     <span class="badge badge-protein">💪 ${m.protein}g protein</span>
-    <span class="badge badge-cal">🔥 ${m.calories}kcal</span>`;
+    <span class="badge badge-cal">🔥 ${m.calories}kcal</span>
+    <span class="badge" style="cursor:pointer;background:rgba(34,197,94,.12);color:#15803d" onclick="setMealCost('${m.id}')" title="What this meal costs YOU — your own entry, never estimated">💰 ${costs[m.id]>0?'₹'+costs[m.id]:'add cost'}</span>`;
 
   document.querySelectorAll('.serving-btn').forEach(b=>b.classList.toggle('active',+b.dataset.s===1));
   renderIngredients(m, 1);
@@ -1954,6 +2080,20 @@ function renderWeekNutrition(){
   if(!el) return;
   const allMeals = window.__MEALS__ || [];
   const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  // cooked totals come from the real History log — planned vs what actually hit the pan
+  const cookedByDay = {};
+  (STATE.history||[]).forEach(h=>{
+    const d = new Date(h.ts);
+    const dk = d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+    const c = cookedByDay[dk] = cookedByDay[dk] || {cal:0, pro:0};
+    c.cal += (h.calories||0); c.pro += (h.protein||0);
+  });
+  // cooked totals: the LAST 7 days (the planner week looks forward, cooking looks back)
+  let cookedCal=0, cookedPro=0;
+  const weekAgoTs = Date.now() - 7*86400000;
+  (STATE.history||[]).forEach(h=>{
+    if(new Date(h.ts).getTime() > weekAgoTs){ cookedCal += (h.calories||0); cookedPro += (h.protein||0); }
+  });
   let totalCal=0, totalPro=0, maxDayCal=0;
   const dayData = getWeekDays().map(d=>{
     const dk = dayKey(d);
@@ -1964,36 +2104,43 @@ function renderWeekNutrition(){
       const m = allMeals.find(x=>x.id===id);
       if(m){ cal+=(m.calories||0); pro+=(m.protein||0); }
     });
+    const hk = d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+    const cooked = cookedByDay[hk] || {cal:0, pro:0};
     totalCal+=cal; totalPro+=pro;
     if(cal>maxDayCal) maxDayCal=cal;
-    return {label:days[d.getDay()], dk, cal, pro};
+    if(cooked.cal>maxDayCal) maxDayCal=cooked.cal;
+    return {label:days[d.getDay()], dk, cal, pro, ccal:cooked.cal, cpro:cooked.pro};
   });
-  if(maxDayCal===0){
+  if(maxDayCal===0 && cookedCal===0){
     el.innerHTML='<div class="week-nutrition"><div class="wn-header"><span class="wn-title">📊 Weekly Nutrition</span></div><div class="wn-rows"><p class="wn-empty">Plan some meals to see nutrition totals</p></div></div>';
     return;
   }
+  if(maxDayCal===0) maxDayCal=1; // cooked-only view: avoid divide-by-zero in the bars
   const rows = dayData.map(d=>{
     const pct = maxDayCal>0?Math.round(d.cal/maxDayCal*100):0;
     const proPct = maxDayCal>0?Math.round(d.pro*4/maxDayCal*100):0; // protein kcal share (4 kcal/g)
+    const cookedPct = maxDayCal>0?Math.round(d.ccal/maxDayCal*100):0;
     return `<div class="wn-row">
       <div class="wn-day">${d.label}</div>
-      <div class="wn-bar-wrap">
+      <div class="wn-bar-wrap" style="position:relative">
         <div class="wn-bar-cal" style="width:${pct}%"></div>
         <div class="wn-bar-pro" style="width:${proPct}%"></div>
+        ${d.ccal?`<div style="position:absolute;left:0;bottom:-3px;height:3px;border-radius:2px;background:#22c55e;width:${cookedPct}%" title="Actually cooked: ${d.ccal} kcal"></div>`:''}
       </div>
-      <div class="wn-nums">${d.cal?d.cal+' kcal':''} ${d.pro?'· '+d.pro+'g':''}</div>
+      <div class="wn-nums">${d.cal?d.cal+' kcal':''} ${d.pro?'· '+d.pro+'g':''}${d.ccal?` <span style="color:#22c55e">✓${d.ccal}</span>`:''}</div>
     </div>`;
   }).join('');
   el.innerHTML=`<div class="week-nutrition">
     <div class="wn-header">
       <span class="wn-title">📊 Weekly Nutrition</span>
       <div class="wn-total">
-        <span class="wn-total-item">🔥 <span>${totalCal} kcal</span></span>
+        <span class="wn-total-item">🔥 <span>${totalCal} kcal planned</span></span>
         <span class="wn-total-item">💪 <span>${totalPro}g protein</span></span>
-        <span class="wn-total-item">📅 <span>~${Math.round(totalCal/7)} kcal/day</span></span>
+        <span class="wn-total-item" style="color:#22c55e">✓ <span>${cookedCal} kcal cooked · ${cookedPro}g (last 7 days)</span></span>
       </div>
     </div>
     <div class="wn-rows">${rows}</div>
+    <p style="font-size:11px;color:var(--text-secondary,#888);margin:6px 2px 0">Green = what you actually logged as cooked this week (from History) — planned vs done, honestly.</p>
   </div>`;
 }
 
@@ -2593,6 +2740,37 @@ function renderHistory(filter){
     list.innerHTML='<div class="history-empty"><div>🍽️</div>No meals logged yet.<br>Cook something and mark it done!</div>';
     return;
   }
+
+  // — Variety score + spend (last 30 days, real logs + your own prices only) —
+  const monthAgo = Date.now() - 30*86400000;
+  const monthLogs = STATE.history.filter(e=>new Date(e.ts).getTime()>monthAgo);
+  if(monthLogs.length>=3){
+    const uniq = new Set(monthLogs.map(e=>e.id)).size;
+    const meatCounts = {};
+    monthLogs.forEach(e=>{
+      const m = (window.__MEALS__||[]).find(x=>x.id===e.id);
+      const meat = m ? getMeatType(m) : 'veg';
+      meatCounts[meat] = (meatCounts[meat]||0)+1;
+    });
+    const MEAT_EMOJI = {chicken:'🍗',beef:'🥩',mutton:'🐑',fish:'🐟',egg:'🥚',veg:'🥬'};
+    const rotation = Object.entries(meatCounts).sort((a,b)=>b[1]-a[1])
+      .map(([k,n])=>`${MEAT_EMOJI[k]||''} ${Math.round(n/monthLogs.length*100)}%`).join(' · ');
+    const costs = load('costs', {});
+    const spendEntries = monthLogs.filter(e=>costs[e.id]>0);
+    const spend = spendEntries.reduce((s,e)=>s+costs[e.id],0);
+    const varietyPct = Math.round(uniq/monthLogs.length*100);
+    const vdiv = document.createElement('div');
+    vdiv.style.cssText='background:var(--card,#fff);border-radius:16px;padding:14px 16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)';
+    vdiv.innerHTML=`<div style="font-weight:700;font-size:14px;margin-bottom:6px">📊 Last 30 days</div>
+      <div style="font-size:13px;line-height:1.7;color:var(--text-secondary,#666)">
+        <b style="color:var(--text,#222)">${uniq}</b> different dishes over <b style="color:var(--text,#222)">${monthLogs.length}</b> cooks · variety ${varietyPct}%<br>
+        Rotation: ${rotation}
+        ${spendEntries.length?`<br>💰 ₹${spend} across ${spendEntries.length} costed meal${spendEntries.length===1?'':'s'} (~₹${Math.round(spend/spendEntries.length)}/meal) <span style="font-size:11px">· from your own entries only</span>`:''}
+      </div>`;
+    list.appendChild(vdiv);
+  }
+
+  const costsMap = load('costs', {});
   items.slice(0,50).forEach(e=>{
     const rating=STATE.ratings[e.id];
     const div=document.createElement('div');
@@ -2600,7 +2778,7 @@ function renderHistory(filter){
     div.innerHTML=`<div class="history-emoji">${e.emoji}</div>
       <div class="history-info">
         <div class="history-name">${e.name}</div>
-        <div class="history-meta">${formatDate(e.ts)} · 💪 ${e.protein}g · 🔥 ${e.calories}kcal</div>
+        <div class="history-meta">${formatDate(e.ts)} · 💪 ${e.protein}g · 🔥 ${e.calories}kcal${costsMap[e.id]>0?' · 💰 ₹'+costsMap[e.id]:''}</div>
       </div>
       <div class="history-rating">${rating==='like'?'👍':rating==='dislike'?'👎':''}</div>`;
     div.onclick=()=>openRecipe(e.id);
@@ -2740,6 +2918,7 @@ function init(){
   renderHome();
   renderMealGrid();
   renderTodaySlots();
+  schedulePrepReminder();
 
   // Add pantry button to history section
   const histSec = document.getElementById('sec-history');
