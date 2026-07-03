@@ -1844,19 +1844,85 @@ function runCookSearch(){
     if(missing.length===0) now.push(row);
     else if(missing.length<=2) almost.push(row);
   });
+  // Leverage analysis over the ingredient graph: for each single missing
+  // ingredient, how many recipes would it unlock right now? ("buy onions →
+  // +6 meals") — computed offline from the full library.
+  const unlockOf = cookUnlockCounts(haveSet);
   now.sort((a,b)=> b.used-a.used || a.total-b.total || a.m.time-b.m.time);
-  almost.sort((a,b)=> a.missing.length-b.missing.length || b.used-a.used || a.m.time-b.m.time);
+  almost.sort((a,b)=>{
+    if(a.missing.length!==b.missing.length) return a.missing.length-b.missing.length;
+    const ua = Math.max(...a.missing.map(x=>unlockOf.get(x.canon)?.count||0));
+    const ub = Math.max(...b.missing.map(x=>unlockOf.get(x.canon)?.count||0));
+    return ub-ua || b.used-a.used || a.m.time-b.m.time;
+  });
 
-  renderCookResults(now.slice(0,8), almost.slice(0,6), have);
+  // Zero-result inputs are the queue for growing COOK_ALIASES — log them
+  // on-device (no network), capped.
+  if(!now.length && !almost.length){
+    const misses = load('cookMisses', {});
+    const key = have.slice(0,6).join(', ');
+    misses[key] = (misses[key]||0)+1;
+    const trimmed = Object.fromEntries(Object.entries(misses).slice(-80));
+    save('cookMisses', trimmed);
+  }
+
+  renderCookResults(now.slice(0,8), almost.slice(0,6), have, unlockOf, cookBundle(haveSet));
 }
 
-function cookRowHTML(row, showMiss){
+// recipes cookable (all non-staple cores matched) against a given have-set
+function cookCookableCount(haveSet){
+  let n = 0;
+  (window.__MEALS__||[]).forEach(m=>{
+    const cores = cookMealCores(m);
+    if(cores.length && cores.every(c=>cookHaveMatch(c.canon, haveSet))) n++;
+  });
+  return n;
+}
+// how many recipes each single extra ingredient would unlock
+function cookUnlockCounts(haveSet){
+  const map = new Map();
+  (window.__MEALS__||[]).forEach(m=>{
+    const cores = cookMealCores(m);
+    if(!cores.length) return;
+    const missing = cores.filter(c=>!cookHaveMatch(c.canon, haveSet));
+    if(missing.length===1){
+      const c = missing[0];
+      if(!map.has(c.canon)) map.set(c.canon, {name:c.name, emoji:c.emoji, count:0});
+      map.get(c.canon).count++;
+    }
+  });
+  return map;
+}
+// greedy 3-item shopping bundle that maximises newly-cookable meals —
+// the pantry is a stock; this optimises its inflow.
+function cookBundle(haveSet){
+  const base = cookCookableCount(haveSet);
+  const cur = new Set(haveSet);
+  const picks = [];
+  for(let k=0;k<3;k++){
+    const unlocks = cookUnlockCounts(cur);
+    let best = null;
+    unlocks.forEach(v=>{ if(!best || v.count>best.count) best = v; });
+    if(!best || best.count<1) break;
+    picks.push(best);
+    cur.add(cookCanon(best.name));
+  }
+  if(picks.length<2) return null;
+  const gained = cookCookableCount(cur) - base;
+  return gained>=3 ? { picks, gained } : null;
+}
+
+function cookRowHTML(row, showMiss, unlockOf){
   const m = row.m;
   const miss = showMiss && row.missing.length
     ? `<div class="cr-miss"><span class="cr-miss-lbl">need</span>${
-        row.missing.map(x=>`<span class="cr-miss-chip">${x.emoji?x.emoji+' ':''}${x.name}</span>`).join('')}</div>`
+        row.missing.map(x=>{
+          const u = unlockOf && unlockOf.get(x.canon);
+          const plus = u && u.count>=2 ? ` <b style="color:#0a7d4f">+${u.count} meals</b>` : '';
+          return `<span class="cr-miss-chip" title="${u&&u.count>=2?`Buying ${x.name} makes ${u.count} recipes fully cookable`:''}">${x.emoji?x.emoji+' ':''}${x.name}${plus}</span>`;
+        }).join('')}</div>`
     : '';
-  return `<div class="cook-result" onclick="openRecipe('${m.id}')">
+  return `<div class="cook-result" onclick="openRecipe('${m.id}')" title="Uses ${row.used} of your listed ingredients (${row.matched}/${row.total} dish-defining ones matched; salt, oil, water & basic spices are assumed)">
     <div class="cr-emoji">${m.emoji}</div>
     <div class="cr-info">
       <div class="cr-name">${m.name}</div>
@@ -1867,20 +1933,28 @@ function cookRowHTML(row, showMiss){
   </div>`;
 }
 
-function renderCookResults(now, almost, have){
+function renderCookResults(now, almost, have, unlockOf, bundle){
   const res = document.getElementById('cook-results');
   let html = '';
   if(now.length){
     html += `<div class="cook-bucket now"><div class="cook-bucket-head">
       <span class="cbh-dot"></span><span class="cbh-title">Cook now</span>
       <span class="cbh-sub">you've got everything</span></div>
+      <div style="font-size:11px;color:var(--text-secondary,#888);margin:-2px 0 6px">matching on: ${have.join(', ')} · staples (salt, oil, water, basic spices) assumed</div>
       ${now.map(r=>cookRowHTML(r,false)).join('')}</div>`;
   }
   if(almost.length){
     html += `<div class="cook-bucket almost"><div class="cook-bucket-head">
       <span class="cbh-dot"></span><span class="cbh-title">Almost there</span>
-      <span class="cbh-sub">grab 1–2 more</span></div>
-      ${almost.map(r=>cookRowHTML(r,true)).join('')}</div>`;
+      <span class="cbh-sub">grab 1–2 more · +N = other meals that buy unlocks</span></div>
+      ${almost.map(r=>cookRowHTML(r,true,unlockOf)).join('')}</div>`;
+  }
+  if(bundle){
+    html += `<div style="background:var(--card,#fff);border:1.5px dashed var(--accent,#e8734a);border-radius:14px;padding:12px 14px;margin:10px 0">
+      <div style="font-weight:700;font-size:13px;margin-bottom:4px">🛒 Smart shopping bundle</div>
+      <div style="font-size:13px;color:var(--text-secondary,#666)">Buy ${bundle.picks.map(p=>`<b style="color:var(--text,#222)">${p.emoji?p.emoji+' ':''}${p.name}</b>`).join(' + ')}
+      → <b style="color:#0a7d4f">+${bundle.gained} meals</b> become fully cookable with what you already have.</div>
+    </div>`;
   }
   if(!now.length && !almost.length){
     html += `<div class="cook-empty"><div class="cook-empty-icon">🤔</div>
@@ -1905,10 +1979,18 @@ function initCook(){
   // rotating placeholder examples
   const examples = ['tomato, onion, 2 eggs, rice…','potato, green chilli, curd…','chicken, onion, tomato…','oats, banana, milk…','paneer, capsicum, onion…','leftover rice, egg, carrot…'];
   if(inp) inp.setAttribute('placeholder', examples[Math.floor(Math.random()*examples.length)]);
-  // quick chips
+  // quick chips — ranked by the user's own most-cooked ingredients, so the
+  // tool learns from history without any AI (capture → suggest loop)
   const qc = document.getElementById('cook-quick-chips');
   if(qc){
-    qc.innerHTML = COOK_QUICK.map(([name,em])=>
+    const histCounts = {};
+    ((window.STATE&&STATE.history)||[]).forEach(e=>{
+      const m = (window.__MEALS__||[]).find(x=>x.id===e.id);
+      if(m) cookMealCores(m).forEach(c=>{ histCounts[c.canon]=(histCounts[c.canon]||0)+1; });
+    });
+    const ranked = COOK_QUICK.slice().sort((a,b)=>
+      (histCounts[cookCanon(b[0])]||0) - (histCounts[cookCanon(a[0])]||0));
+    qc.innerHTML = ranked.map(([name,em])=>
       `<button type="button" class="cook-chip" data-ing="${name}" onclick="cookToggleIng('${name}')">${em} ${name.replace(' slices','')}</button>`).join('');
   }
   // tap-from-a-list panel
@@ -2761,12 +2843,29 @@ function renderHistory(filter){
     const varietyPct = Math.round(uniq/monthLogs.length*100);
     const vdiv = document.createElement('div');
     vdiv.style.cssText='background:var(--card,#fff);border-radius:16px;padding:14px 16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)';
+    // Cook-frequency grid: the habit is the product — give it a face.
+    // 4 weeks × 7 days, Monday-start, today in the last cell's week.
+    const perDay = {};
+    STATE.history.forEach(e=>{ const k=dayKey(new Date(e.ts)); perDay[k]=(perDay[k]||0)+1; });
+    const today = new Date(); today.setHours(0,0,0,0);
+    const monday = new Date(today); monday.setDate(monday.getDate()-((monday.getDay()+6)%7));
+    const start = new Date(monday); start.setDate(start.getDate()-21);
+    let grid = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:8px">';
+    for(let i=0;i<28;i++){
+      const d = new Date(start); d.setDate(start.getDate()+i);
+      const n = perDay[dayKey(d)]||0;
+      const future = d>today;
+      const bg = future ? 'transparent' : n===0 ? 'var(--border,#eee)' : n===1 ? '#f5b895' : '#e8734a';
+      grid += `<div title="${d.toLocaleDateString([],{day:'numeric',month:'short'})}: ${future?'—':n+' cooked'}"
+        style="height:14px;border-radius:3px;background:${bg};${future?'border:1px dashed var(--border,#ddd);':''}${dayKey(d)===dayKey(today)?'outline:1.5px solid var(--text,#333);':''}"></div>`;
+    }
+    grid += '</div><div style="font-size:10px;color:var(--text-secondary,#999);margin-top:3px">last 4 weeks · darker = more cooks that day · outlined = today</div>';
     vdiv.innerHTML=`<div style="font-weight:700;font-size:14px;margin-bottom:6px">📊 Last 30 days</div>
       <div style="font-size:13px;line-height:1.7;color:var(--text-secondary,#666)">
         <b style="color:var(--text,#222)">${uniq}</b> different dishes over <b style="color:var(--text,#222)">${monthLogs.length}</b> cooks · variety ${varietyPct}%<br>
         Rotation: ${rotation}
         ${spendEntries.length?`<br>💰 ₹${spend} across ${spendEntries.length} costed meal${spendEntries.length===1?'':'s'} (~₹${Math.round(spend/spendEntries.length)}/meal) <span style="font-size:11px">· from your own entries only</span>`:''}
-      </div>`;
+      </div>${grid}`;
     list.appendChild(vdiv);
   }
 
