@@ -1964,6 +1964,22 @@ function cookRowHTML(row, showMiss, unlockOf){
 function renderCookResults(now, almost, have, unlockOf, bundle){
   const res = document.getElementById('cook-results');
   let html = '';
+  // SYED-CONCEPT · pantry-match dial: real counts from THIS match run
+  if(now.length || almost.length){
+    const totalMatchable = now.length + almost.length;
+    const pct = Math.round(now.length / totalMatchable * 100);
+    const deg = Math.round(pct * 3.6);
+    html += `<div style="display:flex;align-items:center;gap:14px;background:var(--card,#fff);border:1px solid var(--border,#eee);border-radius:16px;padding:12px 16px;margin-top:14px">
+      <div style="width:56px;height:56px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;
+        background:conic-gradient(var(--olive,#5C7A3E) 0 ${deg}deg, rgba(201,146,13,.35) ${deg}deg 360deg)">
+        <div style="width:42px;height:42px;border-radius:50%;background:var(--card,#fff);display:grid;place-items:center;font-weight:800;font-size:16px;color:var(--text,#222)">${now.length}</div>
+      </div>
+      <div style="min-width:0">
+        <div style="font-weight:800;font-size:13.5px;color:var(--text,#222)">Cook now from your pantry</div>
+        <div style="font-size:12px;color:var(--text3,#888);margin-top:2px">${now.length} ready · ${almost.length} almost there (missing 1–2)</div>
+      </div>
+    </div>`;
+  }
   if(now.length){
     html += `<div class="cook-bucket now"><div class="cook-bucket-head">
       <span class="cbh-dot"></span><span class="cbh-title">Cook now</span>
