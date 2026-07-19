@@ -2904,6 +2904,36 @@ function renderHistory(filter){
         style="height:14px;border-radius:3px;background:${bg};${future?'border:1px dashed var(--border,#ddd);':''}${dayKey(d)===dayKey(today)?'outline:1.5px solid var(--text,#333);':''}"></div>`;
     }
     grid += '</div><div style="font-size:10px;color:var(--text-secondary,#999);margin-top:3px">last 4 weeks · darker = more cooks that day · outlined = today</div>';
+    // — Protein-per-day trend (last 14 days, from the logged meals' own macros) —
+    let macroHtml = '';
+    {
+      const days = [];
+      for(let i=13;i>=0;i--){ const d=new Date(today); d.setDate(today.getDate()-i); days.push(dayKey(d)); }
+      const protPerDay = days.map(k => STATE.history
+        .filter(e=>dayKey(new Date(e.ts))===k)
+        .reduce((s,e)=>s+(Number(e.protein)||0),0));
+      if(protPerDay.some(v=>v>0)){
+        const mx = Math.max(...protPerDay, 1);
+        const bars = protPerDay.map((v,i)=>`<div title="${days[i].slice(5)}: ${v}g protein" style="flex:1;display:flex;flex-direction:column;justify-content:flex-end"><div style="height:${Math.max(2,Math.round(v/mx*26))}px;background:${v>=60?'#22c55e':v>0?'#f5b895':'var(--border,#eee)'};border-radius:2px"></div></div>`).join('');
+        macroHtml = `<div style="margin-top:10px"><div style="display:flex;gap:2px;align-items:flex-end;height:28px">${bars}</div>
+          <div style="font-size:10px;color:var(--text-secondary,#999);margin-top:3px">💪 protein per day, last 14 days (from what you logged) · green = 60g+</div></div>`;
+      }
+    }
+    // — Most-used ingredients across the month's cooks (recipes' own lists) —
+    let ingHtml = '';
+    {
+      const ingCounts = {};
+      monthLogs.forEach(e=>{
+        const m=(window.__MEALS__||[]).find(x=>x.id===e.id);
+        (m?.ingredients||[]).forEach(ing=>{
+          const label=(typeof ing==='string'?ing:ing.item||ing.name||'').toLowerCase().replace(/\(.*?\)/g,'').trim();
+          if(label && !COOK_STAPLE_RE.test(label)) ingCounts[label]=(ingCounts[label]||0)+1;
+        });
+      });
+      const top=Object.entries(ingCounts).sort((a,b)=>b[1]-a[1]).slice(0,5);
+      if(top.length>=3) ingHtml=`<div style="font-size:12px;color:var(--text-secondary,#666);margin-top:8px">🧺 You cook most with: ${top.map(([k,n])=>`<b style="color:var(--text,#222)">${k}</b> ×${n}`).join(' · ')} <span style="font-size:10px">(staples excluded)</span></div>`;
+    }
+    grid += macroHtml + ingHtml;
     vdiv.innerHTML=`<div style="font-weight:700;font-size:14px;margin-bottom:6px">📊 Last 30 days</div>
       <div style="font-size:13px;line-height:1.7;color:var(--text-secondary,#666)">
         <b style="color:var(--text,#222)">${uniq}</b> different dishes over <b style="color:var(--text,#222)">${monthLogs.length}</b> cooks · variety ${varietyPct}%<br>
