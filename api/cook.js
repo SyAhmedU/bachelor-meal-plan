@@ -4,8 +4,8 @@
 // Companion to the offline matcher: this is the ONLY online feature; the rest of the app works offline.
 import { guard } from "./_guard.js";
 
-const PRIMARY = process.env.BMP_COOK_MODEL || "llama-3.3-70b-versatile";
-const FALLBACK = "llama-3.1-8b-instant";
+const PRIMARY = process.env.BMP_COOK_MODEL || "openai/gpt-oss-120b";
+const FALLBACK = "openai/gpt-oss-20b";
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 
 // Common kitchen staples a bachelor is assumed to have — the model may use these
@@ -74,7 +74,7 @@ async function callGroq(model, user) {
     body: JSON.stringify({
       model,
       temperature: 0.7,
-      max_tokens: 900,
+      reasoning_effort: 'low', max_tokens: 900,
       response_format: { type: "json_object" },
       messages: [{ role: "system", content: SYSTEM }, { role: "user", content: user }],
     }),
