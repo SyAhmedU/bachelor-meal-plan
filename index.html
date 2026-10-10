@@ -772,12 +772,12 @@ function mk(){
 mk();if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",mk);
 })();</script>
 <!-- /SYED-GATE -->
-<link rel="stylesheet" href="product-design.css?v=20260912">
+<link rel="stylesheet" href="product-design.css?v=20261010">
 </head>
 <body data-theme="light">
 <a class="skip-link" href="#main">Skip to content</a>
 <div class="syed-bar">
-  <a class="syed-bar-logo" href="https://syahmedu.github.io/nexus/" target="_blank" rel="noopener"><span class="syed-mark">S</span><span class="syed-name">Syed</span></a>
+  <a class="syed-bar-logo" href="https://syed-launchpad.vercel.app" target="_blank" rel="noopener"><span class="syed-mark">S</span><span class="syed-name">Projects</span></a>
   <span class="syed-divider"></span>
   <span class="syed-project">Meal Planner</span>
   <nav class="syed-links">
@@ -802,7 +802,7 @@ mk();if(document.readyState==="loading")document.addEventListener("DOMContentLoa
 <div id="search-bar-wrap">
   <div class="search-inner">
     <span class="search-icon-left">🔍</span>
-    <input type="search" id="search-input" placeholder="Search recipes, ingredients, Tamil/Urdu names…" oninput="handleSearch(this.value)" autocomplete="off" />
+    <input type="search" id="search-input" aria-label="Search recipes and ingredients" placeholder="Search recipes, ingredients, Tamil/Urdu names…" oninput="handleSearch(this.value)" autocomplete="off" />
     <button id="search-clear" onclick="clearSearch()" aria-label="Clear search">✕</button>
   </div>
 </div>
@@ -1076,7 +1076,7 @@ mk();if(document.readyState==="loading")document.addEventListener("DOMContentLoa
       <button class="meal-picker-close" onclick="closeMealPicker()">✕</button>
     </div>
     <div class="meal-picker-search">
-      <input type="text" id="picker-search" placeholder="Search meals…" oninput="filterPickerList(this.value)">
+      <input type="text" id="picker-search" aria-label="Search meals" placeholder="Search meals…" oninput="filterPickerList(this.value)">
     </div>
     <div class="meal-picker-list" id="picker-list"></div>
   </div>
