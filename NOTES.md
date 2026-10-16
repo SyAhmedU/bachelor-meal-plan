@@ -1,0 +1,10 @@
+# bachelor-meal-plan — project notes
+
+> Offloaded from the root `CLAUDE.md` (2026-10-16) to keep that index under its size limit. Canonical detailed reference — read before editing; when notes and code conflict, trust the code and update these notes.
+
+### 6. bachelor-meal-plan/ — Halal Meal App
+Standalone HTML + vanilla JS, mobile-first, 200+ recipes. **Installable PWA** — `manifest.json` + `sw.js` (network-first navigation, SWR assets, same-origin); offline at the stove; maskable `icon.svg`.
+- `meals.js` (~6400 lines) — full meal schema incl. macros, step timers, `nightPrep`, Tamil+Urdu names. `index.html` = whole app (4 bottom-nav tabs: Home·Meals·Plan·History; Settings via header). Storage `bmp_*`; `add_*.py` populate. History "Last 30 days" card: variety/rotation/spend + 4-wk cook grid + (2026-07-19) 14-day **protein-per-day bars** + top-5 most-cooked ingredients (staples excluded).
+- **COOK HERO (home centerpiece):** free-text "what's in my kitchen" box → **offline matcher** over the 200+ recipes (`cookParseInput`/`cookCanon`/`COOK_ALIASES` Tamil/Urdu/Hindi synonyms; staples in `COOK_STAPLE_RE` never block/count) → buckets "Cook now" (missing 0) / "Almost there" (missing 1–2, shows `need` chips). Quick-chips + tap-to-add. The old checkbox "fridge" tab is gone (dead CSS/STATE removed).
+- **AI layer (online-only, graceful offline fallback):** "✨ Invent something new" → `api/cook.js` (Vercel, **Groq** `llama-3.3-70b-versatile`→`llama-3.1-8b-instant`, `GROQ_API_KEY`, override `BMP_COOK_MODEL`; 503 without). POST `{ingredients}` → `{recipe:{emoji,name,time,effort,serves,ingredients[],steps[],tip}}`; **No-fab: HALAL-only, uses only given ingredients + common staples, no invented exotic items.** `api/_guard.js` fail-open size+rate (in-memory). "🍳 Cook step-by-step" reuses `STATE.currentMeal`+`startCookingMode()`. Endpoint relative on `*.vercel.app`, else cross-origin to `bachelor-meal-plan.vercel.app`.
+- GitHub Pages (primary) → syahmedu.github.io/bachelor-meal-plan/ · Vercel (AI fn) → bachelor-meal-plan.vercel.app
