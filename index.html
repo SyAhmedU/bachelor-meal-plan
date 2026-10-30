@@ -3533,7 +3533,7 @@ var s=document.createElement('style');s.id='syed-juice';s.textContent=css;docume
     btn.id = 'syed-tour-btn';
     btn.type = 'button';
     btn.setAttribute('aria-label', 'Watch the ' + NAME + ' tour');
-    btn.style.cssText = 'position:fixed;right:18px;bottom:84px;z-index:9000;display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:999px;border:1px solid rgba(203,184,232,.4);background:rgba(21,16,31,.88);color:#f3eefc;font:600 13px/1 "Plus Jakarta Sans",system-ui,sans-serif;cursor:pointer;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:0 4px 18px rgba(0,0,0,.35)';
+    btn.style.cssText = 'position:fixed;right:18px;bottom:84px;z-index:9000;display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:999px;border:1px solid rgba(203,184,232,.4);background:rgba(21,16,31,.88);color:#f3eefc;font:600 13px/1 Inter,system-ui,sans-serif;cursor:pointer;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:0 4px 18px rgba(0,0,0,.35)';
     btn.innerHTML = '<span style="display:inline-grid;place-items:center;width:18px;height:18px;border-radius:999px;background:linear-gradient(135deg,#FF9656,#F14575 55%,#9270F4);color:#fff;font-size:8px;line-height:1">\u25B6</span><span>Tour</span>';
     btn.addEventListener('click', open);
     document.body.appendChild(btn);
@@ -3558,7 +3558,7 @@ var s=document.createElement('style');s.id='syed-juice';s.textContent=css;docume
     v.controls = true; v.autoplay = true; v.playsInline = true;
     v.style.cssText = 'width:100%;border-radius:16px;border:1px solid rgba(203,184,232,.3);background:#000';
     var bar = document.createElement('div');
-    bar.style.cssText = 'display:' + (LANGS.length > 1 ? 'flex' : 'none') + ';flex-wrap:wrap;align-items:center;gap:6px;font:500 12px/1.3 "Plus Jakarta Sans",system-ui,sans-serif;color:#cbb8e8';
+    bar.style.cssText = 'display:' + (LANGS.length > 1 ? 'flex' : 'none') + ';flex-wrap:wrap;align-items:center;gap:6px;font:500 12px/1.3 Inter,system-ui,sans-serif;color:#cbb8e8';
     var note = document.createElement('span');
     note.style.cssText = 'margin-left:6px;opacity:.75';
     var paint = function () {
@@ -3568,7 +3568,7 @@ var s=document.createElement('style');s.id='syed-juice';s.textContent=css;docume
     LANGS.forEach(function (l) {
       var b = document.createElement('button');
       b.type = 'button'; b.dataset.l = l; b.textContent = LABEL[l];
-      b.style.cssText = 'padding:6px 14px;border-radius:999px;border:1px solid rgba(203,184,232,.4);font:600 13px/1 "Plus Jakarta Sans",system-ui,sans-serif;cursor:pointer';
+      b.style.cssText = 'padding:6px 14px;border-radius:999px;border:1px solid rgba(203,184,232,.4);font:600 13px/1 Inter,system-ui,sans-serif;cursor:pointer';
       b.addEventListener('click', function () {
         if (l === lang) return;
         // the languages run to different lengths, so keep the same place proportionally
@@ -3583,7 +3583,7 @@ var s=document.createElement('style');s.id='syed-juice';s.textContent=css;docume
     var x = document.createElement('button');
     x.type = 'button';
     x.textContent = 'Close \u2715';
-    x.style.cssText = 'align-self:flex-end;padding:6px 14px;border-radius:999px;border:1px solid rgba(203,184,232,.4);background:transparent;color:#cbb8e8;font:600 13px/1 "Plus Jakarta Sans",system-ui,sans-serif;cursor:pointer';
+    x.style.cssText = 'align-self:flex-end;padding:6px 14px;border-radius:999px;border:1px solid rgba(203,184,232,.4);background:transparent;color:#cbb8e8;font:600 13px/1 Inter,system-ui,sans-serif;cursor:pointer';
     function close() { bd.remove(); document.removeEventListener('keydown', onKey); }
     function onKey(e) { if (e.key === 'Escape') close(); }
     bd.addEventListener('click', function (e) { if (e.target === bd) close(); });
